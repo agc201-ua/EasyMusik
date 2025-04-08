@@ -32,6 +32,7 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         MainWindow(QWidget *parent = nullptr);
         ~MainWindow();
         void probar();
+        void crearNotaCayendo(qreal posX, bool esNegra);
 };
 
 #endif

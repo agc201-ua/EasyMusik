@@ -9,26 +9,37 @@
 #include <QList>
 #include <QPen>
 
-class Teclado : public QGraphicsItem {
+class Teclado {
+
     private:
         // Atributos
         QVector<Tecla*> teclas;
-        int anchuraTeclado;
-        int alturaTeclado;
+        qreal anchuraTeclado;
+        qreal alturaTeclado;
         qreal anchuraTeclaBlanca;
         qreal alturaTeclaBlanca;
         qreal anchuraTeclaNegra;
         qreal alturaTeclaNegra;
+
         // Métodos
         void calcularDimensiones(int anchuraPantalla);
-    public:
-        Teclado(QGraphicsScene* scene, int anchuraPantalla);
-        ~Teclado();
-        void pintarTeclado(QGraphicsScene* scene);
 
-        // Métodos del demonio para que no me detecte esto como una clase abstracta
-        // Todo sea por QGraphicsItem
-        QRectF boundingRect() const override;
-        void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    public:
+        // Constructor y destructor
+        Teclado(QGraphicsScene* scene, int anchuraPantalla, int alturaPantalla);
+        ~Teclado();
+
+        // Getters
+        QVector<Tecla*> getTeclas();
+        Tecla* getTecla(QVector<QString> nombres);
+        qreal getAnchuraTeclado();
+        qreal getAlturaTeclado();
+        qreal getAnchuraTeclaBlanca();
+        qreal getAlturaTeclaBlanca();
+        qreal getAnchuraTeclaNegra();
+        qreal getAlturaTeclaNegra();
+
+        // Métodos adicionalesss
+        void posicionarTeclas(QGraphicsScene* scene, int alturaPantalla);
 };
 #endif

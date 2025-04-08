@@ -1,5 +1,4 @@
-#include "MainWindow.h"             // Incluimos la clase MainWindow
-//#include "./ui_mainwindow.h"         // Incluimos el archivo generado automáticamente por Qt Designer
+#include "MainWindow.h"
 
 #include <QTimer>
 
@@ -21,12 +20,13 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     anchuraPantalla = screenGeometry.width();
     alturaPantalla = screenGeometry.height();
 
-    // Crear el teclado y añadirlo a la escena
-    teclado = new Teclado(scene, anchuraPantalla);
-    scene->addItem(teclado);
+    // Crear el teclado y añadir sus teclas a la escena
+    teclado = new Teclado(scene, anchuraPantalla, alturaPantalla);
 
-    //
-    probar();
+    // Simulación de teclas cayendo
+    crearNotaCayendo(0, false);
+    crearNotaCayendo(34, false);
+    crearNotaCayendo(68, false);
 }
 
 MainWindow::~MainWindow() {
@@ -36,55 +36,81 @@ MainWindow::~MainWindow() {
     delete teclado;
 }
 
-// HACEMOS UNA PRUEBA DE Q CAE UNA TECLA PA VER SI DETECTA COLISION
-void MainWindow::probar() {
+void MainWindow::crearNotaCayendo(qreal posX, bool esNegra) {
+    qreal anchoNota = 0, alturaNota = 0;
 
-    // Definir tecla cayendo
-    QGraphicsRectItem* teclaCayendo = new QGraphicsRectItem(0, 0, 40, 40); // (x, y, width, height)
-    teclaCayendo->setBrush(Qt::blue);  // Color de la nota
-    teclaCayendo->setPos(0, -100);      // Posición inicial (puedes cambiarla según tu escena)
+    // Calculamos el tamaño de la tecla que cae
+    if (esNegra) {
+        anchoNota = teclado->getAnchuraTeclaNegra();
+        alturaNota = teclado->getAlturaTeclaNegra();
+    }
+    else {
+        anchoNota = teclado->getAnchuraTeclaBlanca();
+        alturaNota = teclado->getAlturaTeclaBlanca();
+    }
+
+    // Creamos al tecla cayendo
+    auto* teclaCayendo = new QGraphicsRectItem(0, 0, anchoNota, alturaNota);
+    teclaCayendo->setBrush(Qt::blue);
+    teclaCayendo->setPen(Qt::NoPen); // Para que pille bien el boundingRect
+    teclaCayendo->setZValue(-1); // Para que no se vea por encima del teclado
+    teclaCayendo->setPos(posX, 0);
     scene->addItem(teclaCayendo);
 
-    // Configurar un QTimer para mover la tecla hacia abajo cada 50 ms (o el intervalo que prefieras)
+    // Estado para esta tecla
+    struct EstadoTecla {
+        bool desintegrando = false;
+        Tecla* teclaColisionada = nullptr;
+    };
+
+    auto* estado = new EstadoTecla;
+
+    // Iniciamos el timer
     QTimer* timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, [=]() mutable {
 
-    connect(timer, &QTimer::timeout, [=]() {
-        teclaCayendo->moveBy(0, 5);  // Mover la tecla hacia abajo
+        // Si aun no ha tocado el teclado
+        if (!estado->desintegrando) {
+            teclaCayendo->moveBy(0, 5);
 
-        // Detectar las colisiones con las teclas en el teclado
-        QList<QGraphicsItem*> colisiones = teclaCayendo->collidingItems();
-        for (QGraphicsItem* item : colisiones) {
-            Tecla* tecla = dynamic_cast<Tecla*>(item);
-            if (tecla) {
-                tecla->iluminar();  // Ilumina la tecla si hay colisión
+            // Comprobamos si ha habido alguna colisión
+            QList<QGraphicsItem*> colisiones = teclaCayendo->collidingItems();
+            for (QGraphicsItem* item : colisiones) {
+                Tecla* tecla = qgraphicsitem_cast<Tecla*>(item);
+
+                // Si hay colisión, se ilumina la tecla colisionada y empieza la desintegración de la tecla cayendo
+                if (tecla) {
+                    tecla->iluminar();
+                    estado->desintegrando = true;
+                    estado->teclaColisionada = tecla;
+                    break;
+                }
             }
         }
 
-        // Si la tecla cae fuera de la pantalla, detener el timer
-        if (teclaCayendo->pos().y() > alturaPantalla) {
-            timer->stop();
-            delete teclaCayendo;  // Eliminar la tecla cuando ya no sea visible
+        else {
+            QRectF rect = teclaCayendo->rect();
+
+            // Se va desintegrando la parte de abajo
+            if (rect.height() > 2) {
+                teclaCayendo->moveBy(0, 5);
+
+                // Recortamos la nota desde abajo
+                rect.setHeight(rect.height() - 5);
+                teclaCayendo->setRect(rect);
+            }
+            // Cuando se ha desintegrado por completo
+            else {
+                timer->stop();
+                estado->teclaColisionada->apagar();
+                scene->removeItem(teclaCayendo);
+                delete teclaCayendo;
+                delete estado;
+            }
         }
     });
 
-    // Iniciar el temporizador para que se mueva la tecla
-    timer->start(50);  // 50 ms, ajusta el valor según lo que necesites
+    // Empieza a correr el timer
+    timer->start(30);
 }
-
-/*
-// Constructor de la clase MainWindow
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)           // Llama al constructor de la clase base QMainWindow
-    , ui(new Ui::MainWindow)        // Crea un objeto `ui` que manejará la interfaz gráfica
-{
-    ui->setupUi(this);              // Configura la interfaz de usuario (llama al código generado por Qt Designer)
-}
-
-// Destructor de la clase MainWindow
-MainWindow::~MainWindow()
-{
-    delete ui;                      // Libera la memoria usada por el objeto `ui` cuando ya no se necesita
-}
-*/
-
 

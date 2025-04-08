@@ -13,9 +13,10 @@ using namespace std;
  * "Duración": 1.0
 */
 
-Tecla::Tecla(QVector<QString> names, int octave) {
+Tecla::Tecla(QVector<QString> names, int octave, bool illuminated) {
     nombres = names;
     octava = octave;
+    iluminada = illuminated;
 }
 
 QVector<QString> Tecla::getNombres() {
@@ -26,12 +27,40 @@ int Tecla::getOctava() {
     return octava;
 }
 
-qreal Tecla::getPosicion() {
-    return posicion;
+qreal Tecla::getPosX() {
+    return posX;
 }
 
-void Tecla::setPosicion(qreal position) {
-    posicion = position;
+qreal Tecla::getPosY() {
+    return posY;
+}
+
+qreal Tecla::getAnchura() {
+    return anchura;
+}
+
+qreal Tecla::getAltura() {
+    return altura;
+}
+
+void Tecla::setPosX(qreal x) {
+    posX = x;
+}
+
+void Tecla::setPosY(qreal y) {
+    posY = y;
+}
+
+void Tecla::setAnchura(qreal width) {
+    anchura = width;
+}
+
+void Tecla::setAltura(qreal height) {
+    altura = height;
+}
+
+void Tecla::setIluminada(bool iluminated) {
+    iluminada = iluminated;
 }
 
 bool Tecla::esNegra() {
@@ -43,9 +72,49 @@ bool Tecla::esNegra() {
 }
 
 void Tecla::iluminar() {
+    iluminada = true;
     setBrush(QBrush(Qt::blue));
+    update();
 }
 
 void Tecla::apagar() {
+    iluminada = false;
     setBrush(QBrush(esNegra() ? Qt::black : Qt::white));
+    update();
+}
+
+// Establecer el área de detección de colisiones
+QRectF Tecla::boundingRect() const {
+    return QRectF(0, 0, anchura, altura);
+}
+
+// Pintar la tecla
+void Tecla::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+
+    // Tecla iluminada
+    if (iluminada) {
+        painter->setBrush(QBrush(Qt::blue));
+        painter->setPen(QPen(Qt::black));
+    }
+
+    // Tecla blanca
+    else if (!this->esNegra()) {
+        painter->setBrush(Qt::white);
+        painter->setPen(QPen(Qt::black));
+    }
+
+    // Tecla negra
+    else {
+        painter->setBrush(Qt::black);
+        painter->setPen(QPen(Qt::black));
+    }
+
+    // Dibujamos el objeto gráfico de la tecla
+    painter->drawRect(0, 0, anchura, altura);
+}
+
+QPainterPath Tecla::shape() const {
+    QPainterPath path;
+    path.addRect(boundingRect());
+    return path;
 }

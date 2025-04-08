@@ -5,20 +5,34 @@
 #include <QGraphicsRectItem>
 #include <QBrush>
 
-class Tecla : public QGraphicsRectItem {
+class Tecla : public QObject, public QGraphicsRectItem {
+    Q_OBJECT
+
     private:
         QVector<QString> nombres;
         int octava;
-        qreal posicion;
+        qreal posX;
+        qreal posY;
+        qreal anchura;
+        qreal altura;
+        bool iluminada;
 
     public:
-        Tecla(QVector<QString> names, int octave);
+        // Constructor
+        Tecla(QVector<QString> names, int octave, bool illuminated = false);
 
-        // Getters y setter
+        // Getters y setters
         QVector<QString> getNombres();
         int getOctava();
-        qreal getPosicion();
-        void setPosicion(qreal position);
+        qreal getPosX();
+        qreal getPosY();
+        qreal getAnchura();
+        qreal getAltura();
+        void setPosX(qreal x);
+        void setPosY(qreal y);
+        void setAnchura(qreal width);
+        void setAltura(qreal height);
+        void setIluminada(bool iluminated);
 
         // Métodos adicionalesss
         bool esNegra();
@@ -27,7 +41,10 @@ class Tecla : public QGraphicsRectItem {
         void probar();
 
         // Métodos del demonio para que no me detecte esto como una clase abstracta
-
+        // Todo sea por QGraphicsItem
+        QRectF boundingRect() const override;
+        void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+        QPainterPath shape() const override;
 };
 
 #endif

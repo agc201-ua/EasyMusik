@@ -2,6 +2,7 @@
 
 #include <QPainter>
 
+// Calcular las dimensiones del teclado y sus teclas
 void Teclado::calcularDimensiones(int anchuraPantalla) {
     // Calcular la anchura de cada tecla
     anchuraTeclaBlanca = anchuraPantalla / 45;
@@ -13,10 +14,92 @@ void Teclado::calcularDimensiones(int anchuraPantalla) {
 
     // Definir la anchura y la altura del teclado
     anchuraTeclado = anchuraPantalla;
-    alturaTeclado = static_cast<int>(alturaTeclaBlanca);
+    alturaTeclado = alturaTeclaBlanca;
 }
 
-Teclado::Teclado(QGraphicsScene *scene, int anchuraPantalla) {
+void Teclado::posicionarTeclas(QGraphicsScene *scene, int alturaPantalla) {
+    // Se inicializa la posición horizontal para las teclas
+    qreal x = 0;
+
+    // Se recorren las teclas del teclado
+    for (int i=0; i<teclas.size(); i++) {
+        Tecla* t = teclas[i];
+
+        // Definir al teclado como el padre a nivel gráfico de tecla
+        //t->setParentItem(this);
+
+        // Posicionar la tecla
+        if (t->esNegra()) {
+            // Para que Qt sepa en que sitio de la escena se encuentra
+            t->setPos(x - (anchuraTeclaNegra / 2), alturaPantalla - alturaTeclado);
+            t->setZValue(1);
+            // Inicializar posición y dimensión
+            t->setPosX(x - (anchuraTeclaNegra / 2));
+            t->setPosY(alturaPantalla - alturaTeclado);
+            t->setAnchura(anchuraTeclaNegra);
+            t->setAltura(alturaTeclaNegra);
+
+        } else {
+            // Para que Qt sepa en que sitio de la escena se encuentra
+            t->setPos(x, alturaPantalla - alturaTeclado);
+            t->setZValue(0);
+            // Inicializar posición y dimensión
+            t->setPosX(x);
+            t->setPosY(alturaPantalla - alturaTeclado);
+            t->setAnchura(anchuraTeclaBlanca);
+            t->setAltura(alturaTeclaBlanca);
+            // Avanzar la posición para la siguiente tecla blanca
+            x += anchuraTeclaBlanca;
+        }
+
+        // Añadir la tecla a la escena
+        scene->addItem(t);
+    }
+}
+
+QVector<Tecla*> Teclado::getTeclas() {
+    return teclas;
+}
+
+Tecla* Teclado::getTecla(QVector<QString> nombres) {
+    Tecla* tecla = nullptr;
+
+    for (Tecla* t : teclas) {
+        if (t->getNombres() == nombres) {
+            tecla = t;
+            break;
+        }
+    }
+
+    return tecla;
+}
+
+qreal Teclado::getAnchuraTeclado() {
+    return anchuraTeclado;
+}
+
+qreal Teclado::getAlturaTeclado() {
+    return alturaTeclado;
+}
+
+qreal Teclado::getAnchuraTeclaBlanca() {
+    return anchuraTeclaBlanca;
+}
+
+qreal Teclado::getAlturaTeclaBlanca() {
+    return alturaTeclaBlanca;
+}
+
+qreal Teclado::getAnchuraTeclaNegra() {
+    return anchuraTeclaNegra;
+}
+
+qreal Teclado::getAlturaTeclaNegra() {
+    return alturaTeclaNegra;
+}
+
+// Constructor
+Teclado::Teclado(QGraphicsScene *scene, int anchuraPantalla, int alturaPantalla) {
 
     // Se calculan las dimensiones del teclado
     calcularDimensiones(anchuraPantalla);
@@ -104,85 +187,7 @@ Teclado::Teclado(QGraphicsScene *scene, int anchuraPantalla) {
     };
 
     // Dibujar las teclas
-    pintarTeclado(scene);
-}
-
-void Teclado::pintarTeclado(QGraphicsScene *scene) {
-    // Se inicializa la posición horizontal para las teclas
-    qreal x = 0;
-
-    // Se recorren las teclas del teclado
-    for (int i=0; i<teclas.size(); i++) {
-        Tecla* t = teclas[i];
-
-        // Definir al teclado como el padre a nivel gráfico de tecla
-        t->setParentItem(this);
-
-        // Crear el objeto gráfico de la tecla
-        QGraphicsRectItem* tecla = new QGraphicsRectItem(x, 0,
-                                                         t->esNegra() ? anchuraTeclaNegra : anchuraTeclaBlanca,
-                                                         t->esNegra() ? alturaTeclaNegra : alturaTeclaBlanca);
-
-        // Posicionar la tecla
-        if (t->esNegra()) {
-            t->setPosicion(x - (anchuraTeclaNegra / 2));
-        } else {
-            t->setPosicion(x);
-            x += anchuraTeclaBlanca;  // Avanzamos la posición para la siguiente tecla blanca
-        }
-
-        // Añadir la tecla a la escena
-        scene->addItem(tecla);
-    }
-}
-
-// Esto define el área del teclado en el que se puede detectar la colisión
-QRectF Teclado::boundingRect() const {
-    return QRectF(0, 0, anchuraTeclado, alturaTeclado);
-}
-
-void Teclado::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-
-    // Primero dibujamos el fondo del teclado (el área donde estarán las teclas)
-    painter->setBrush(Qt::transparent);
-    painter->setPen(Qt::NoPen);
-    painter->drawRect(0, 0, anchuraTeclado, alturaTeclado);
-
-    // Primero, dibujamos las teclas blancas
-    for (Tecla* t : teclas) {
-        // Comprobamos si la tecla es blanca
-        if (!t->esNegra()) {
-            painter->setBrush(Qt::white);  // Tecla blanca
-            painter->setPen(QPen(Qt::black));
-
-            // Establecer el rectángulo para dibujar la tecla blanca
-            qreal x = t->getPosicion();  // Obtén la posición horizontal de la tecla
-            qreal y = 0;  // Las teclas empiezan en la parte superior del teclado
-            qreal width = anchuraTeclaBlanca;
-            qreal height = alturaTeclaBlanca;
-
-            // Dibujamos el rectángulo de la tecla blanca
-            painter->drawRect(x, y, width, height);
-        }
-    }
-
-    // Después, dibujamos las teclas negras (encima de las blancas)
-    for (Tecla* t : teclas) {
-        // Comprobamos si la tecla es negra
-        if (t->esNegra()) {
-            painter->setBrush(Qt::black);  // Tecla negra
-            painter->setPen(QPen(Qt::black));
-
-            // Establecer el rectángulo para dibujar la tecla negra
-            qreal x = t->getPosicion();  // Obtén la posición horizontal de la tecla
-            qreal y = 0;  // Las teclas empiezan en la parte superior del teclado
-            qreal width = anchuraTeclaNegra;
-            qreal height = alturaTeclaNegra;
-
-            // Dibujamos el rectángulo de la tecla negra
-            painter->drawRect(x, y, width, height);
-        }
-    }
+    posicionarTeclas(scene, alturaPantalla);
 }
 
 Teclado::~Teclado() {
