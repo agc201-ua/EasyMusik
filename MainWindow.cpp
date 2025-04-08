@@ -11,8 +11,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     setCentralWidget(view);
     view->setRenderHint(QPainter::Antialiasing); // Mejorar la calidad del renderizado
 
-    // Establecer la ventana para que ocupe toda la pantalla
-    setWindowState(Qt::WindowMaximized);
+    // Hacer que la ventana se abra en pantalla completa
+    showFullScreen();
+
+    // Deshabilitar el scroll
+    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     // Obtener las dimensiones de la pantalla
     QScreen *screen = QGuiApplication::primaryScreen();
