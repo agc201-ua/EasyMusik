@@ -25,11 +25,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(EasyMusik
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        TeclaCayendo.h TeclaCayendo.cpp
         Tecla.h Tecla.cpp
         Teclado.h Teclado.cpp
 
-        jsondeprueba.json
+
         recursos.qrc
 
     )

@@ -7,15 +7,16 @@
 #include <QTimer>
 
 void MainWindow::leerNotasDesdeJson(const QString& ruta) {
+    // Abre el json utilizando la ruta de recursos.qrc
     QFile archivo(ruta);
     if (!archivo.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning("No se pudo abrir el archivo JSON.");
         return;
     }
 
+    // Lee los datos y comprueba que el formato es correcto
     QByteArray datos = archivo.readAll();
     archivo.close();
-
     QJsonDocument doc = QJsonDocument::fromJson(datos);
     if (!doc.isObject()) {
         qWarning("El JSON no es un objeto.");
@@ -24,23 +25,17 @@ void MainWindow::leerNotasDesdeJson(const QString& ruta) {
 
     QJsonObject rootObj = doc.object();
     QJsonArray notasArray = rootObj["Notas"].toArray();
-
     for (const QJsonValue& valor : notasArray) {
         QJsonObject obj = valor.toObject();
         QString nota = obj["Nota"].toString();
         int octava = obj["Octava"].toInt();
         float offset = static_cast<float>(obj["Offset"].toDouble());
-        float duracion = static_cast<float>(obj["Duracion"].toDouble());
-
         QString codigo = nota + QString::number(octava);
         int delayMs = static_cast<int>(offset * 1000);
 
+        // ⏱ Disparar la nota tras el retardo correspondiente
         QTimer::singleShot(delayMs, this, [=]() {
-            // Obtener la posición X de la tecla desde el método de la clase Teclado
-            float x = teclado->obtenerXdeCodigo(codigo);
-            if (x < 0) return; // No se encontró la tecla
-
-            // Buscar la tecla correspondiente
+            // Buscar la tecla real directamente
             Tecla* teclaReal = nullptr;
             for (Tecla* t : teclado->getTeclas()) {
                 if (t->getOctava() == octava && t->getNombres().contains(nota)) {
@@ -48,46 +43,36 @@ void MainWindow::leerNotasDesdeJson(const QString& ruta) {
                     break;
                 }
             }
-
             if (!teclaReal) return;
 
-            // Medidas reales de la tecla
-            qreal anchoOriginal = teclaReal->boundingRect().width(); // más fiable
-            qreal alto = teclaReal->boundingRect().height();
+            // Obtener rectángulo exacto que ocupa la tecla en la escena
+            QRectF teclaRect = teclaReal->mapRectToScene(teclaReal->boundingRect());
 
-            // DEBUG: Información de la tecla y su posicionamiento
-            qDebug() << "Nota:" << nota << "Octava:" << octava << "X real:" << x
-                     << "Ancho original:" << anchoOriginal << "Alto:" << alto;
-
-            // Reducimos el ancho de la nota
-            qreal anchoReducido = anchoOriginal * 0.5; // puedes ajustar este valor si es necesario
-            // Corregir la posición para que se centre correctamente (ajustamos un poco el desplazamiento si está a la derecha)
-            qreal xCentrada = x + (anchoOriginal - anchoReducido) / 2;
-
-            // DEBUG: Ver en la consola cómo se alinea
-            qDebug() << "X centrada corregida:" << xCentrada;
-
-            // Crear rectángulo de nota cayendo con el ancho reducido
-            QGraphicsRectItem* notaCayendo = new QGraphicsRectItem(0, 0, anchoReducido, alto);
+            // Crear la nota con exactamente las mismas dimensiones y posición que la tecla real
+            QGraphicsRectItem* notaCayendo = new QGraphicsRectItem(0, 0, teclaRect.width(), teclaRect.height());
             notaCayendo->setBrush(Qt::blue);
-            // Usamos xCentrada para asegurarnos que la tecla se alinee correctamente
-            notaCayendo->setPos(xCentrada, -alto);
+            notaCayendo->setPos(teclaRect.x(), -teclaRect.height());  // Empieza fuera de pantalla
+
+            // Establecer Z-value adecuada
+            notaCayendo->setZValue(-1);  // Se dibuja por debajo de todas las teclas
             scene->addItem(notaCayendo);
 
+            // Movimiento hacia abajo
             QTimer* timer = new QTimer(this);
             connect(timer, &QTimer::timeout, [=]() {
-                notaCayendo->moveBy(0, 5);
+                notaCayendo->moveBy(0, 5);  // Velocidad de caída
 
-                QList<QGraphicsItem*> colisiones = notaCayendo->collidingItems();
-                for (QGraphicsItem* item : colisiones) {
-                    Tecla* t = dynamic_cast<Tecla*>(item);
-                    if (t) {
-                        t->iluminar();
-                    }
+                // Solo iluminar la tecla correspondiente cuando esté cerca del teclado
+                if (notaCayendo->y() + teclaRect.height() > teclaReal->scenePos().y()) {
+                    teclaReal->iluminar();
                 }
 
-                if (notaCayendo->pos().y() > alturaPantalla) {
+                // Borrar la nota cuando sale de la pantalla
+                if (notaCayendo->y() > alturaPantalla) {
                     timer->stop();
+                    timer->deleteLater();
+                    teclaReal->apagar();
+                    scene->removeItem(notaCayendo);
                     delete notaCayendo;
                 }
             });
