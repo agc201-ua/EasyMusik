@@ -55,7 +55,7 @@ void MainWindow::crearNotaCayendo(qreal posX, bool esNegra) {
 
     // Creamos al tecla cayendo
     auto* teclaCayendo = new QGraphicsRectItem(0, 0, anchoNota, alturaNota);
-    teclaCayendo->setBrush(Qt::blue);
+    teclaCayendo->setBrush(Qt::white);
     teclaCayendo->setPen(Qt::NoPen); // Para que pille bien el boundingRect
     teclaCayendo->setZValue(-1); // Para que no se vea por encima del teclado
     teclaCayendo->setPos(posX, 0);

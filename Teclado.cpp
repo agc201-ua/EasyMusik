@@ -9,8 +9,8 @@ void Teclado::calcularDimensiones(int anchuraPantalla) {
     anchuraTeclaNegra = (2.0 / 3.0) * anchuraTeclaBlanca;
 
     // Calcular la altura de cada tecla en función a la anchura
-    alturaTeclaBlanca = 10 * anchuraTeclaBlanca;
-    alturaTeclaNegra = 7.5 * anchuraTeclaBlanca;
+    alturaTeclaBlanca = 9 * anchuraTeclaBlanca;
+    alturaTeclaNegra = 6.25 * anchuraTeclaBlanca;
 
     // Definir la anchura y la altura del teclado
     anchuraTeclado = anchuraPantalla;
