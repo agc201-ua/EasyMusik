@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>jsondeprueba.json</file>
         <file>1stGnossienne_EricSatie.json</file>
     </qresource>
 </RCC>
