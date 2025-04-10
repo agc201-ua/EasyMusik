@@ -33,6 +33,7 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         ~MainWindow();
         void probar();
         void crearNotaCayendo(qreal posX, bool esNegra);
+        void leerNotasDesdeJson(const QString& ruta);
 };
 
 #endif

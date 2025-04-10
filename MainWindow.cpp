@@ -1,6 +1,101 @@
 #include "MainWindow.h"
-
+#include "Teclado.h"
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QTimer>
+
+void MainWindow::leerNotasDesdeJson(const QString& ruta) {
+    QFile archivo(ruta);
+    if (!archivo.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning("No se pudo abrir el archivo JSON.");
+        return;
+    }
+
+    QByteArray datos = archivo.readAll();
+    archivo.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(datos);
+    if (!doc.isObject()) {
+        qWarning("El JSON no es un objeto.");
+        return;
+    }
+
+    QJsonObject rootObj = doc.object();
+    QJsonArray notasArray = rootObj["Notas"].toArray();
+
+    for (const QJsonValue& valor : notasArray) {
+        QJsonObject obj = valor.toObject();
+        QString nota = obj["Nota"].toString();
+        int octava = obj["Octava"].toInt();
+        float offset = static_cast<float>(obj["Offset"].toDouble());
+        float duracion = static_cast<float>(obj["Duracion"].toDouble());
+
+        QString codigo = nota + QString::number(octava);
+        int delayMs = static_cast<int>(offset * 1000);
+
+        QTimer::singleShot(delayMs, this, [=]() {
+            // Obtener la posición X de la tecla desde el método de la clase Teclado
+            float x = teclado->obtenerXdeCodigo(codigo);
+            if (x < 0) return; // No se encontró la tecla
+
+            // Buscar la tecla correspondiente
+            Tecla* teclaReal = nullptr;
+            for (Tecla* t : teclado->getTeclas()) {
+                if (t->getOctava() == octava && t->getNombres().contains(nota)) {
+                    teclaReal = t;
+                    break;
+                }
+            }
+
+            if (!teclaReal) return;
+
+            // Medidas reales de la tecla
+            qreal anchoOriginal = teclaReal->boundingRect().width(); // más fiable
+            qreal alto = teclaReal->boundingRect().height();
+
+            // DEBUG: Información de la tecla y su posicionamiento
+            qDebug() << "Nota:" << nota << "Octava:" << octava << "X real:" << x
+                     << "Ancho original:" << anchoOriginal << "Alto:" << alto;
+
+            // Reducimos el ancho de la nota
+            qreal anchoReducido = anchoOriginal * 0.5; // puedes ajustar este valor si es necesario
+            // Corregir la posición para que se centre correctamente (ajustamos un poco el desplazamiento si está a la derecha)
+            qreal xCentrada = x + (anchoOriginal - anchoReducido) / 2;
+
+            // DEBUG: Ver en la consola cómo se alinea
+            qDebug() << "X centrada corregida:" << xCentrada;
+
+            // Crear rectángulo de nota cayendo con el ancho reducido
+            QGraphicsRectItem* notaCayendo = new QGraphicsRectItem(0, 0, anchoReducido, alto);
+            notaCayendo->setBrush(Qt::blue);
+            // Usamos xCentrada para asegurarnos que la tecla se alinee correctamente
+            notaCayendo->setPos(xCentrada, -alto);
+            scene->addItem(notaCayendo);
+
+            QTimer* timer = new QTimer(this);
+            connect(timer, &QTimer::timeout, [=]() {
+                notaCayendo->moveBy(0, 5);
+
+                QList<QGraphicsItem*> colisiones = notaCayendo->collidingItems();
+                for (QGraphicsItem* item : colisiones) {
+                    Tecla* t = dynamic_cast<Tecla*>(item);
+                    if (t) {
+                        t->iluminar();
+                    }
+                }
+
+                if (notaCayendo->pos().y() > alturaPantalla) {
+                    timer->stop();
+                    delete notaCayendo;
+                }
+            });
+            timer->start(50);
+        });
+    }
+}
+
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     // Crear la escena
@@ -28,9 +123,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     teclado = new Teclado(scene, anchuraPantalla, alturaPantalla);
 
     // Simulación de teclas cayendo
-    crearNotaCayendo(0, false);
+    /*crearNotaCayendo(0, false);
     crearNotaCayendo(34, false);
-    crearNotaCayendo(68, false);
+    crearNotaCayendo(68, false);*/
+    leerNotasDesdeJson(":/1stGnossienne_EricSatie.json");
 }
 
 MainWindow::~MainWindow() {

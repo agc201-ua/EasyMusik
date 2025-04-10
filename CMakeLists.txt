@@ -28,6 +28,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         TeclaCayendo.h TeclaCayendo.cpp
         Tecla.h Tecla.cpp
         Teclado.h Teclado.cpp
+
+        jsondeprueba.json
+        recursos.qrc
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET EasyMusik APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
