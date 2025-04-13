@@ -1,11 +1,12 @@
-#include "mainwindow.h"
-#include "tecla.h"          // Importamos la clase Tecla para poder probarla
+#include "MainWindow.h"
+//#include "TeclaCayendo.h"          // Importamos la clase Tecla para poder probarla
 #include <QApplication>
 #include <QDebug>            // Importamos QDebug para poder hacer pruebas por consola
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlDebuggingEnabler>
 
 
+/*
 // 🔥 Función de prueba para crear objetos Tecla y probar sus valores
 void testTeclas() {
     // Creamos dos objetos Tecla con valores arbitrarios
@@ -16,13 +17,14 @@ void testTeclas() {
     qDebug() << "Código tecla 1:" << t1.getCodigo();   // Debería mostrar "C4"
     qDebug() << "Código tecla 2:" << t2.getCodigo();   // Debería mostrar "D4"
 }
+*/
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv); // Inicializa la aplicación Qt
 
     // 🔥 Llamada a la función de prueba que creará las teclas
-    testTeclas();  // Esta línea llama a la función que ejecuta las pruebas de la clase Tecla
+    //testTeclas();  // Esta línea llama a la función que ejecuta las pruebas de la clase Tecla
 
     // Creamos la ventana principal de la aplicación, la cual está definida en `mainwindow.ui` (Qt Designer)
     MainWindow w;
