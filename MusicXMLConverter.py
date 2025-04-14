@@ -1,12 +1,13 @@
 import json, os, sys, subprocess, traceback
 
 from music21 import converter, chord, note
+import sqlite3
 
 
 class MusicXMLConverter:
     ## Variables estáticas de los directorios
     direccion_json = "./partiturasJSON/"
-    
+
 
     ## Constructor que recibe el nombre del archivo PDF, el nombre de la partitura y el nombre del autor.
     def __init__(self, archivo_pdf, nombre_partitura, nombre_autor):
@@ -36,6 +37,7 @@ class MusicXMLConverter:
 
         print("El archivo PDF es válido.\n\n")
         return True
+
 
     ## Método para convertir un archivo PDF a MusicXML.
     ## Se utiliza Audiveris por comando para que no se abra el cliente.
@@ -101,13 +103,31 @@ class MusicXMLConverter:
 
         # Se guarda el array de notas en un diccionario para guardarlo despues en base de datos y si es necesario en los archivos .json .txt.
         datos = {"Notas": notas_ordenadas}
+        datos_txt = datos.__str__()
         
         # Se guarda la cancion en base de datos con el nombre y el autor que se le pasan por parametro en el constructor.
-        """
-        --------------------------------------------------------
-        --------------------------------------------------------
-        """
+        # Conectar a la base de datos SQLite
+        conexion = sqlite3.connect("canciones.db")
+        cursor = conexion.cursor()
 
+        # Verificar si ya existe una canción con el mismo título y autor.
+        cursor.execute("SELECT id FROM Partituras WHERE titulo = ? AND autor = ?", (self.nombre_partitura, self.nombre_autor))
+        resultado = cursor.fetchone()
+
+        if resultado:
+            print(f"La canción '{self.nombre_partitura}' de '{self.nombre_autor}' ya existe en la base de datos.")
+        else:
+            # Insertar la nueva cancion.
+            cursor.execute("INSERT INTO Partituras (titulo, autor, contenido) VALUES (?, ?, ?)", (self.nombre_partitura, self.nombre_autor, datos_txt))
+            
+            # Guardar los cambios.
+            conexion.commit()
+            print(f"Canción '{self.nombre_partitura}' de '{self.nombre_autor}' guardada exitosamente.")
+
+        # Guardar los cambios y cerrar la conexión
+        conexion.close()
+
+        print("Datos guardados en la base de datos.\n\n")
 
         # Si el parametro guardar_txt es True, se guardan los archivos .json y .txt con los datos de la partitura.
         if guardar_txt:
@@ -115,7 +135,6 @@ class MusicXMLConverter:
                 json.dump(datos, f, indent=4, ensure_ascii=False)
         
             with open(self.archivo_txt, "w", encoding="utf-8") as f:
-                datos_txt = datos.__str__()
                 f.write(datos_txt)
 
             print(f"Conversión a JSON completada.\nArchivo JSON guardado en: {self.archivo_json}")
