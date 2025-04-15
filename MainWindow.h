@@ -2,10 +2,17 @@
 #define MAINWINDOW_H
 
 #include "Teclado.h"
-
+#include "PausaDialog.h"
 #include <QMainWindow> // Incluye la clase base de Qt para crear una ventana principal
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QTimer>
+#include <QKeyEvent>
+
 
 /*
 QT_BEGIN_NAMESPACE
@@ -34,7 +41,13 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         void probar();
         void crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo);
         void leerNotasDesdeJson(const QString& ruta);
-        //void keyPressEvent(QKeyEvent* event);
+        void keyPressEvent(QKeyEvent* event);
+
+    private slots:
+        void mostrarMenuPausa();
+        void reiniciarCancion();
+        void cerrarAplicacion();
+
 
 };
 

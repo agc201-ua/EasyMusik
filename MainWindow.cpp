@@ -1,10 +1,4 @@
 #include "MainWindow.h"
-#include "Teclado.h"
-#include <QFile>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QTimer>
 
 // Carga un archivo JSON con notas musicales y programa su aparición en pantalla en el momento indicado
 void MainWindow::leerNotasDesdeJson(const QString& ruta) {
@@ -85,11 +79,25 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     // Crear el teclado y añadir sus teclas a la escena
     teclado = new Teclado(scene, anchuraPantalla, alturaPantalla);
 
-    // Simulación de teclas cayendo
-    /*crearNotaCayendo(0, false);
-    crearNotaCayendo(34, false);
-    crearNotaCayendo(68, false);*/
-    leerNotasDesdeJson(":/1stGnossienne_EricSatie.json");
+    // Crear un texto inicial para el mensaje de pausa
+    QGraphicsTextItem* mensaje = scene->addText("PULSA ESPACIO PARA PONER PAUSA");
+    mensaje->setDefaultTextColor(Qt::yellow);
+    QFont fuente("Arial", 24, QFont::Bold);
+    mensaje->setFont(fuente);
+
+    // Centrar el texto horizontalmente
+    qreal x = (anchuraPantalla - mensaje->boundingRect().width()) / 2;
+    qreal y = 100; // un poco desde arriba
+    mensaje->setPos(x, y);
+
+    // Esperar 2 segundos antes de lanzar las notas (simula comienzo)
+    QTimer::singleShot(2000, this, [=]() {
+        scene->removeItem(mensaje); // Elimina el mensaje
+        delete mensaje;
+
+        // Leer y lanzar las notas desde el JSON
+        leerNotasDesdeJson(":/1stGnossienne_EricSatie.json");
+    });
 }
 
 MainWindow::~MainWindow() {
@@ -137,11 +145,34 @@ void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo) 
 }
 
 // Este método se activa cuando el usuario pulsa cualquier tecla mientras la ventana tiene el foco
-/*void MainWindow::keyPressEvent(QKeyEvent* event) {
+void MainWindow::keyPressEvent(QKeyEvent* event) {
     // Si la tecla pulsada es la barra espaciadora
     if (event->key() == Qt::Key_Space) {
         // Llama al método que mostrará el menú de pausa (lo crearemos en el siguiente paso)
         mostrarMenuPausa();
     }
 }
-*/
+
+void MainWindow::mostrarMenuPausa() {
+    PausaDialog dialog(this);
+
+    // Conectar las acciones del menú
+    connect(&dialog, &PausaDialog::reiniciarClicked, this, &MainWindow::reiniciarCancion);
+    connect(&dialog, &PausaDialog::salirClicked, this, &MainWindow::cerrarAplicacion);
+
+    dialog.exec(); // Bloquea hasta cerrar
+}
+
+void MainWindow::reiniciarCancion() {
+    // Aquí podrías limpiar la escena, reiniciar timers, etc.
+    qDebug() << "Reiniciando canción...";
+    // Por ejemplo:
+    QCoreApplication::exit(123); // Puedes reiniciar la app o recargar escena
+}
+
+void MainWindow::cerrarAplicacion() {
+    qDebug() << "Saliendo de la app...";
+    QCoreApplication::quit();
+}
+
+
