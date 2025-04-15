@@ -6,36 +6,42 @@
 #include <QJsonObject>
 #include <QTimer>
 
+// Carga un archivo JSON con notas musicales y programa su aparición en pantalla en el momento indicado
 void MainWindow::leerNotasDesdeJson(const QString& ruta) {
-    // Abre el json utilizando la ruta de recursos.qrc
     QFile archivo(ruta);
+
+    // Abre el archivo en modo solo lectura
     if (!archivo.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning("No se pudo abrir el archivo JSON.");
         return;
     }
 
-    // Lee los datos y comprueba que el formato es correcto
+    // Lee el contenido completo del archivo y lo cierra
     QByteArray datos = archivo.readAll();
     archivo.close();
+
+    // Intenta interpretar los datos como un documento JSON
     QJsonDocument doc = QJsonDocument::fromJson(datos);
     if (!doc.isObject()) {
         qWarning("El JSON no es un objeto.");
         return;
     }
 
-    QJsonObject rootObj = doc.object();
-    QJsonArray notasArray = rootObj["Notas"].toArray();
+    // Extrae el array de notas del JSON
+    QJsonArray notasArray = doc.object()["Notas"].toArray();
+
+    // Itera sobre cada nota
     for (const QJsonValue& valor : notasArray) {
         QJsonObject obj = valor.toObject();
-        QString nota = obj["Nota"].toString();
-        int octava = obj["Octava"].toInt();
-        float offset = static_cast<float>(obj["Offset"].toDouble());
-        QString codigo = nota + QString::number(octava);
-        int delayMs = static_cast<int>(offset * 1000);
+        QString nota = obj["Nota"].toString();          // Nombre de la nota (por ej. "C", "D#", etc.)
+        int octava = obj["Octava"].toInt();             // Octava correspondiente
+        float offset = static_cast<float>(obj["Offset"].toDouble()); // Momento en segundos en el que debe caer la nota
+        QString codigo = nota + QString::number(octava); // Código de nota (ej. "C4")
+        int delayMs = static_cast<int>(offset * 1000);   // Se convierte a milisegundos
 
-        // ⏱ Disparar la nota tras el retardo correspondiente
+        // Programa una acción que se ejecutará después del tiempo de offset
         QTimer::singleShot(delayMs, this, [=]() {
-            // Buscar la tecla real directamente
+            // Busca la tecla real del teclado a la que corresponde esta nota
             Tecla* teclaReal = nullptr;
             for (Tecla* t : teclado->getTeclas()) {
                 if (t->getOctava() == octava && t->getNombres().contains(nota)) {
@@ -45,42 +51,14 @@ void MainWindow::leerNotasDesdeJson(const QString& ruta) {
             }
             if (!teclaReal) return;
 
-            // Obtener rectángulo exacto que ocupa la tecla en la escena
-            QRectF teclaRect = teclaReal->mapRectToScene(teclaReal->boundingRect());
+            // Calcula la posición exacta en la escena donde debe aparecer la nota cayendo
+            QRectF rect = teclaReal->mapRectToScene(teclaReal->boundingRect());
 
-            // Crear la nota con exactamente las mismas dimensiones y posición que la tecla real
-            QGraphicsRectItem* notaCayendo = new QGraphicsRectItem(0, 0, teclaRect.width(), teclaRect.height());
-            notaCayendo->setBrush(Qt::blue);
-            notaCayendo->setPos(teclaRect.x(), -teclaRect.height());  // Empieza fuera de pantalla
-
-            // Establecer Z-value adecuada
-            notaCayendo->setZValue(-1);  // Se dibuja por debajo de todas las teclas
-            scene->addItem(notaCayendo);
-
-            // Movimiento hacia abajo
-            QTimer* timer = new QTimer(this);
-            connect(timer, &QTimer::timeout, [=]() {
-                notaCayendo->moveBy(0, 5);  // Velocidad de caída
-
-                // Solo iluminar la tecla correspondiente cuando esté cerca del teclado
-                if (notaCayendo->y() + teclaRect.height() > teclaReal->scenePos().y()) {
-                    teclaReal->iluminar();
-                }
-
-                // Borrar la nota cuando sale de la pantalla
-                if (notaCayendo->y() > alturaPantalla) {
-                    timer->stop();
-                    timer->deleteLater();
-                    teclaReal->apagar();
-                    scene->removeItem(notaCayendo);
-                    delete notaCayendo;
-                }
-            });
-            timer->start(50);
+            // Crea visualmente la nota cayendo en esa posición
+            crearNotaCayendo(rect.x(), -rect.height(), teclaReal);
         });
     }
 }
-
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     // Crear la escena
@@ -121,81 +99,49 @@ MainWindow::~MainWindow() {
     delete teclado;
 }
 
-void MainWindow::crearNotaCayendo(qreal posX, bool esNegra) {
-    qreal anchoNota = 0, alturaNota = 0;
+// Crea una nota visual que cae desde una posición concreta y colisiona con una tecla
+void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo) {
+    // Tamaño igual que la tecla objetivo
+    qreal anchoNota = teclaObjetivo->boundingRect().width();
+    qreal alturaNota = teclaObjetivo->boundingRect().height();
 
-    // Calculamos el tamaño de la tecla que cae
-    if (esNegra) {
-        anchoNota = teclado->getAnchuraTeclaNegra();
-        alturaNota = teclado->getAlturaTeclaNegra();
-    }
-    else {
-        anchoNota = teclado->getAnchuraTeclaBlanca();
-        alturaNota = teclado->getAlturaTeclaBlanca();
-    }
+    // Crea un rectángulo que representa la nota cayendo
+    auto* nota = new QGraphicsRectItem(0, 0, anchoNota, alturaNota);
+    nota->setBrush(Qt::yellow);              // Cambiado a amarillo para visibilidad
+    nota->setPen(Qt::NoPen);                 // Sin borde
+    nota->setZValue(-1);                     // Aparece detrás del teclado
+    nota->setPos(posX, posY);                // Posición inicial fuera de pantalla
+    scene->addItem(nota);
 
-    // Creamos al tecla cayendo
-    auto* teclaCayendo = new QGraphicsRectItem(0, 0, anchoNota, alturaNota);
-    teclaCayendo->setBrush(Qt::white);
-    teclaCayendo->setPen(Qt::NoPen); // Para que pille bien el boundingRect
-    teclaCayendo->setZValue(-1); // Para que no se vea por encima del teclado
-    teclaCayendo->setPos(posX, 0);
-    scene->addItem(teclaCayendo);
-
-    // Estado para esta tecla
-    struct EstadoTecla {
-        bool desintegrando = false;
-        Tecla* teclaColisionada = nullptr;
-    };
-
-    auto* estado = new EstadoTecla;
-
-    // Iniciamos el timer
+    // Crea un temporizador para mover la nota continuamente
     QTimer* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [=]() mutable {
+        nota->moveBy(0, 5);  // Desplaza hacia abajo
 
-        // Si aun no ha tocado el teclado
-        if (!estado->desintegrando) {
-            teclaCayendo->moveBy(0, 5);
-
-            // Comprobamos si ha habido alguna colisión
-            QList<QGraphicsItem*> colisiones = teclaCayendo->collidingItems();
-            for (QGraphicsItem* item : colisiones) {
-                Tecla* tecla = qgraphicsitem_cast<Tecla*>(item);
-
-                // Si hay colisión, se ilumina la tecla colisionada y empieza la desintegración de la tecla cayendo
-                if (tecla) {
-                    tecla->iluminar();
-                    estado->desintegrando = true;
-                    estado->teclaColisionada = tecla;
-                    break;
-                }
-            }
+        // Si está cerca de la tecla objetivo, se ilumina
+        if (nota->y() + alturaNota > teclaObjetivo->scenePos().y()) {
+            teclaObjetivo->iluminar();
         }
 
-        else {
-            QRectF rect = teclaCayendo->rect();
-
-            // Se va desintegrando la parte de abajo
-            if (rect.height() > 2) {
-                teclaCayendo->moveBy(0, 5);
-
-                // Recortamos la nota desde abajo
-                rect.setHeight(rect.height() - 5);
-                teclaCayendo->setRect(rect);
-            }
-            // Cuando se ha desintegrado por completo
-            else {
-                timer->stop();
-                estado->teclaColisionada->apagar();
-                scene->removeItem(teclaCayendo);
-                delete teclaCayendo;
-                delete estado;
-            }
+        // Si sale de la pantalla, se limpia y se apaga la tecla
+        if (nota->y() > alturaPantalla) {
+            timer->stop();
+            timer->deleteLater();
+            teclaObjetivo->apagar();
+            scene->removeItem(nota);
+            delete nota;
         }
     });
 
-    // Empieza a correr el timer
-    timer->start(30);
+    timer->start(30);  // Velocidad de caída
+}
+
+// Este método se activa cuando el usuario pulsa cualquier tecla mientras la ventana tiene el foco
+void MainWindow::keyPressEvent(QKeyEvent* event) {
+    // Si la tecla pulsada es la barra espaciadora
+    if (event->key() == Qt::Key_Space) {
+        // Llama al método que mostrará el menú de pausa (lo crearemos en el siguiente paso)
+        mostrarMenuPausa();
+    }
 }
 
