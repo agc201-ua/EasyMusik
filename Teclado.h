@@ -41,7 +41,8 @@ class Teclado {
 
         // Métodos adicionalesss
         void posicionarTeclas(QGraphicsScene* scene, int alturaPantalla);
-        qreal obtenerXdeCodigo(QString codigo);
+        /*qreal obtenerXdeCodigo(QString codigo);
+        QPair<qreal, bool> obtenerDatosTecla(QString codigo);*/
 
 };
 #endif

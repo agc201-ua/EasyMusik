@@ -32,8 +32,10 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         MainWindow(QWidget *parent = nullptr);
         ~MainWindow();
         void probar();
-        void crearNotaCayendo(qreal posX, bool esNegra);
+        void crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo);
         void leerNotasDesdeJson(const QString& ruta);
+        void keyPressEvent(QKeyEvent* event);
+
 };
 
 #endif
