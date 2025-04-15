@@ -137,11 +137,11 @@ void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo) 
 }
 
 // Este método se activa cuando el usuario pulsa cualquier tecla mientras la ventana tiene el foco
-void MainWindow::keyPressEvent(QKeyEvent* event) {
+/*void MainWindow::keyPressEvent(QKeyEvent* event) {
     // Si la tecla pulsada es la barra espaciadora
     if (event->key() == Qt::Key_Space) {
         // Llama al método que mostrará el menú de pausa (lo crearemos en el siguiente paso)
         mostrarMenuPausa();
     }
 }
-
+*/

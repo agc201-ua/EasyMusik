@@ -34,7 +34,7 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         void probar();
         void crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo);
         void leerNotasDesdeJson(const QString& ruta);
-        void keyPressEvent(QKeyEvent* event);
+        //void keyPressEvent(QKeyEvent* event);
 
 };
 
