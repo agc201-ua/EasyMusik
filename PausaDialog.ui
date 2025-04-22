@@ -16,10 +16,10 @@
   <widget class="QWidget" name="gridLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>60</y>
-     <width>271</width>
-     <height>171</height>
+     <x>70</x>
+     <y>50</y>
+     <width>221</width>
+     <height>151</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
