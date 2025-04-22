@@ -8,7 +8,10 @@ PausaDialog::PausaDialog(QWidget *parent)
     ui->setupUi(this);
 
     // Conectar señales con botones
-    connect(ui->btnReiniciar, &QPushButton::clicked, this, &PausaDialog::reiniciarClicked);
+    connect(ui->btnReiniciar, &QPushButton::clicked, this, [=]() {
+        emit reiniciarClicked();  // Lanza la señal
+        this->accept();           // Cierra el diálogo automáticamente
+    });
     connect(ui->btnSalir, &QPushButton::clicked, this, &PausaDialog::salirClicked);
 }
 

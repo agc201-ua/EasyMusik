@@ -187,6 +187,12 @@ void MainWindow::mostrarMenuPausa() {
 
 // Reinicia la canción
 void MainWindow::reiniciarCancion() {
+    // Cancela los temporizadores activos
+    for (QTimer* t : timersNotas) {
+        t->stop();
+        t->deleteLater();
+    }
+    timersNotas.clear();
     // Elimina todas las notas que estén en pantalla (Z=-1 indica nota cayendo)
     for (QGraphicsItem* item : scene->items()) {
         if (item->zValue() == -1) {
