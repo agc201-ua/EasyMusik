@@ -4,6 +4,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 #include <QBrush>
+#include <QSoundEffect>
 
 class Tecla : public QObject, public QGraphicsRectItem {
     Q_OBJECT
@@ -16,6 +17,7 @@ class Tecla : public QObject, public QGraphicsRectItem {
         qreal anchura;
         qreal altura;
         bool iluminada;
+        QString rutaAudio;
 
     public:
         // Constructor
@@ -28,6 +30,8 @@ class Tecla : public QObject, public QGraphicsRectItem {
         qreal getPosY();
         qreal getAnchura();
         qreal getAltura();
+        QString getRutaAudio();
+        bool getIluminada();
         void setPosX(qreal x);
         void setPosY(qreal y);
         void setAnchura(qreal width);

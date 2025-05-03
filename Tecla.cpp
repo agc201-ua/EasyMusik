@@ -2,6 +2,7 @@
 
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QDir>
 
 using namespace std;
 
@@ -17,6 +18,22 @@ Tecla::Tecla(QVector<QString> names, int octave, bool illuminated) {
     nombres = names;
     octava = octave;
     iluminada = illuminated;
+
+    // Obtener el audio
+    // Construimos el nombre del archivo, por ejemplo "E-3.wav"
+    QString nombreArchivo = names.first() + QString::number(octave) + ".wav";
+
+    // Ruta al recurso
+    QDir dir(QDir::currentPath());   // Obtén el directorio actual
+    dir.cdUp();
+    dir.cdUp();
+    rutaAudio = dir.absoluteFilePath("wav_sounds/" + nombreArchivo);  // Construye la ruta del archivo
+
+    QFile file(rutaAudio);
+    if (!file.exists()) {
+        qDebug() << "El archivo de audio no existe en la ruta: " << rutaAudio;
+        return;
+    }
 }
 
 QVector<QString> Tecla::getNombres() {
@@ -61,6 +78,14 @@ void Tecla::setAltura(qreal height) {
 
 void Tecla::setIluminada(bool iluminated) {
     iluminada = iluminated;
+}
+
+bool Tecla::getIluminada() {
+    return iluminada;
+}
+
+QString Tecla::getRutaAudio() {
+    return rutaAudio;
 }
 
 bool Tecla::esNegra() {

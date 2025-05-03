@@ -35,7 +35,7 @@ if __name__ == "__main__":
                 convertermxl.convertir_pdf_a_musicxml()
 
                 # Unir partituras y convertir a JSON.
-                convertermxl.musicxml_a_json()
+                convertermxl.musicxml_a_json(guardar_txt=True)
 
         except Exception as e:
             print("Error en la conversión:", e.args)
