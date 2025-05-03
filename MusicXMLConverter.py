@@ -6,7 +6,7 @@ import sqlite3
 
 class MusicXMLConverter:
     ## Variables estáticas de los directorios
-    direccion_json = "./partiturasJSON/"
+    direccion_json = "./"
 
 
     ## Constructor que recibe el nombre del archivo PDF, el nombre de la partitura y el nombre del autor.
@@ -103,7 +103,7 @@ class MusicXMLConverter:
 
         # Se guarda el array de notas en un diccionario para guardarlo despues en base de datos y si es necesario en los archivos .json .txt.
         datos = {"Notas": notas_ordenadas}
-        datos_txt = datos.__str__()
+        datos_txt = json.dumps(datos)
         
         # Se guarda la cancion en base de datos con el nombre y el autor que se le pasan por parametro en el constructor.
         # Conectar a la base de datos SQLite
@@ -172,7 +172,23 @@ class MusicXMLConverter:
             for archivo in os.listdir("."):
                 if archivo.endswith(".mxl"):
                     os.remove(os.path.join(".", archivo))
-                    print(f"Archivo eliminado: {archivo}")
+                    print(f"Archivo eliminado: {archivo}\n")
         except Exception as e:
             print("Error al eliminar archivos temporales:", e.args)
+            traceback.print_exc()
+
+        print("Eliminando carpeta __pycache__.")
+
+        try:
+            pycache_path = os.path.join(".", "__pycache__")
+            if os.path.isdir(pycache_path):
+                for root, dirs, files in os.walk(pycache_path, topdown=False):
+                    for file in files:
+                        os.remove(os.path.join(root, file))
+                    for dir in dirs:
+                        os.rmdir(os.path.join(root, dir))
+                os.rmdir(pycache_path)
+                print(f"Carpeta __pycache__ eliminada: {pycache_path}")
+        except Exception as e:
+            print("Error al eliminar la carpeta __pycache__:", e.args)
             traceback.print_exc()
