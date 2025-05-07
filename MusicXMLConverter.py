@@ -48,7 +48,7 @@ class MusicXMLConverter:
         # Se pone la ruta de el .bat de Audiveris.
         # Se puede poner una ruta de destino si se le agrega el argumento -output y despues la ruta de destino (como se eliminan los ficheros temporales no lo he puesto).
         comando = [
-            ".\\Audiveris\\bin\\Audiveris.bat",
+            ".\\Audiveris\\Audiveris.exe",
             "-batch",
             "-export",
             self.archivo_pdf
@@ -73,7 +73,7 @@ class MusicXMLConverter:
         print("Convirtiendo el archivo MusicXML (", self.archivo_mxl, ") a texto.")
 
         partitura = converter.parse(self.archivo_mxl)
-  
+
         notas = []
 
         # Se recorren las notas de la partitura una a una (si es un acorde se considera un solo conjunto de notas).
