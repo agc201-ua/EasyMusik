@@ -49,12 +49,16 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         void leerNotasDesdeJson(const QString& ruta);
         void leerNotasDesdeBaseDeDatos(const QString& titulo, const QString& autor);
         void keyPressEvent(QKeyEvent* event);
+        // Codigo de A
+        void leerPartiturasDesdeBaseDeDatos();
 
     private slots:
         void mostrarMenuPausa();
         void reiniciarCancion();
         void cerrarAplicacion();
         void mostrarCuentaAtras();
+        // Codigo de A
+        void mostrarPartituras();
 
 
 };

@@ -1,91 +1,67 @@
 #include "MainWindow.h"
+#include "basededatos.h"
 #include <QSoundEffect>
 #include <QFileInfo>
 #include <QDir>
 
+//
+void MainWindow::leerPartiturasDesdeBaseDeDatos() {
+    BaseDeDatos db("Canciones.db");
+    QMap<int, QString> mapaIdNombre;
+
+    if(!db.MapaDeCanciones(mapaIdNombre)) {
+        qWarning("Error al sacar las canciones");
+        return;
+    }
+    //AQUI DEBERIA DE TENER TODAS LAS CANCIONES EN UN MAPA ID NOMBRE
+}
+
+
 //Carga la cancion pasada en los parametros de la base de datos si esta guardada
 void MainWindow::leerNotasDesdeBaseDeDatos(const QString& titulo, const QString& autor) {
-    QSqlDatabase::removeDatabase("QSQLITE");
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 
-    QString rutaBase = QCoreApplication::applicationDirPath(); // build/Desktop_Qt...
-    QDir dir(rutaBase);
-    dir.cdUp(); // Sube un nivel a build
-    dir.cdUp(); // Sube un nivel a EasyMusik
-    db.setDatabaseName(dir.filePath("canciones.db"));
+    BaseDeDatos db("canciones.db"); // Constructor cual se alimenta del nombre de la base de datos
 
-    if (!db.open()) {
-        qWarning() << "No se pudo abrir la base de datos." << db.lastError().text();
-        db.close();
+    QJsonArray notasArray;
+
+    if(!db.ConsultaJArray(notasArray, titulo, autor)) {
         return;
     }
 
-    qDebug() << "Ruta absoluta de la base de datos:" << QFileInfo(db.databaseName()).absoluteFilePath();
+    for (const QJsonValue& valor : notasArray) {
+        QJsonObject obj = valor.toObject();
+        QString nota = obj["Nota"].toString();
+        int octava = obj["Octava"].toInt();
+        float offset = static_cast<float>(obj["Offset"].toDouble());
+        QString codigo = nota + QString::number(octava);
+        int delayMs = qRound(offset * 1000.0);
 
-    QSqlQuery query;
-    QString string_query = QString("SELECT contenido FROM Partituras WHERE titulo = '%1' AND autor = '%2'")
-                               .arg(titulo)
-                               .arg(autor);
+        QTimer* timer = new QTimer(this);
+        timer->setSingleShot(true);
+        timer->setInterval(delayMs);
+        timersNotas.append(timer);
 
-    if (!query.exec(string_query)) {
-        qWarning() << "Error al ejecutar la consulta: " << query.lastError().text();
-        db.close();
-        return;
-    }
-
-    if (query.next()) {
-        QString contenidoJson = query.value(0).toString();
-        QJsonDocument doc = QJsonDocument::fromJson(contenidoJson.toUtf8());
-
-        if (!doc.isObject()) {
-            qWarning("El contenido JSON no es un objeto.");
-            db.close();
-            return;
-        }
-
-        QJsonArray notasArray = doc.object()["Notas"].toArray();
-
-        for (const QJsonValue& valor : notasArray) {
-            QJsonObject obj = valor.toObject();
-            QString nota = obj["Nota"].toString();
-            int octava = obj["Octava"].toInt();
-            float offset = static_cast<float>(obj["Offset"].toDouble());
-            QString codigo = nota + QString::number(octava);
-            int delayMs = qRound(offset * 1000.0);
-
-            QTimer* timer = new QTimer(this);
-            timer->setSingleShot(true);
-            timer->setInterval(delayMs);
-            timersNotas.append(timer);
-
-            connect(timer, &QTimer::timeout, this, [=]() {
-                Tecla* teclaReal = nullptr;
-                for (Tecla* t : teclado->getTeclas()) {
-                    if (t->getOctava() == octava && t->getNombres().contains(nota)) {
-                        teclaReal = t;
-                        break;
-                    }
+        connect(timer, &QTimer::timeout, this, [=]() {
+            Tecla* teclaReal = nullptr;
+            for (Tecla* t : teclado->getTeclas()) {
+                if (t->getOctava() == octava && t->getNombres().contains(nota)) {
+                    teclaReal = t;
+                    break;
                 }
-                if (!teclaReal) return;
+            }
+            if (!teclaReal) return;
 
-                QRectF rect = teclaReal->mapRectToScene(teclaReal->boundingRect());
-                qreal duracionNota = obj["Duracion"].toDouble();
-                crearNotaCayendo(rect.x(), -rect.height(), teclaReal, duracionNota);
+            QRectF rect = teclaReal->mapRectToScene(teclaReal->boundingRect());
+            qreal duracionNota = obj["Duracion"].toDouble();
+            crearNotaCayendo(rect.x(), -rect.height(), teclaReal, duracionNota);
 
-                timersNotas.removeOne(timer);
-                timer->deleteLater();
-            });
+            timersNotas.removeOne(timer);
+            timer->deleteLater();
+        });
 
-            timer->start();
-        }
-    } else {
-        qWarning() << "No se encontró la partitura para título y autor dados.";
-        db.close();
-        return;
+        timer->start();
     }
 
-    db.close();
-    QSqlDatabase::removeDatabase("Verificador"); // Limpia la conexión
 }
 
 // Carga un archivo JSON con notas musicales y programa su aparición en pantalla en el momento indicado
@@ -154,6 +130,13 @@ void MainWindow::leerNotasDesdeJson(const QString& ruta) {
 
 // Constructor de la ventana principal
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
+
+    //LOGICA DE MAINWINDOW.UI
+
+
+
+
+
     // Crear la escena
     scene = new QGraphicsScene(this);
 
@@ -366,7 +349,9 @@ void MainWindow::mostrarCuentaAtras() {
     int* indice = new int(0); // Se necesita puntero para mantener valor entre llamadas
 
     QTimer* temporizador = new QTimer(this);
+
     connect(temporizador, &QTimer::timeout, this, [=]() mutable {
+
         if (*indice < mensajes.size()) {
             textoCuenta->setPlainText(mensajes[*indice]);
             (*indice)++;
@@ -384,7 +369,7 @@ void MainWindow::mostrarCuentaAtras() {
             } else {
                 qWarning("jsonActual está vacío. No se puede iniciar la canción.");
             }
-            /**/
+            */
 
             leerNotasDesdeBaseDeDatos("ParaElisa", "Beethoven");
         }
