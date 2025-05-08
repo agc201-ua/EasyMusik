@@ -13,6 +13,8 @@ void MainWindow::leerPartiturasDesdeBaseDeDatos() {
         qWarning("Error al sacar las canciones");
         return;
     }
+
+
     //AQUI DEBERIA DE TENER TODAS LAS CANCIONES EN UN MAPA ID NOMBRE
 }
 
@@ -55,71 +57,6 @@ void MainWindow::leerNotasDesdeBaseDeDatos(const QString& titulo, const QString&
             qreal duracionNota = obj["Duracion"].toDouble();
             crearNotaCayendo(rect.x(), -rect.height(), teclaReal, duracionNota);
 
-            timersNotas.removeOne(timer);
-            timer->deleteLater();
-        });
-
-        timer->start();
-    }
-
-}
-
-// Carga un archivo JSON con notas musicales y programa su aparición en pantalla en el momento indicado
-void MainWindow::leerNotasDesdeJson(const QString& ruta) {
-    QFile archivo(ruta);
-
-    // Abre el archivo en modo solo lectura
-    if (!archivo.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning("No se pudo abrir el archivo JSON.");
-        return;
-    }
-
-    // Lee el contenido completo del archivo y lo cierra
-    QByteArray datos = archivo.readAll();
-    archivo.close();
-
-    // Intenta interpretar los datos como un documento JSON
-    QJsonDocument doc = QJsonDocument::fromJson(datos);
-    if (!doc.isObject()) {
-        qWarning("El JSON no es un objeto.");
-        return;
-    }
-
-    // Extrae el array de notas del JSON
-    QJsonArray notasArray = doc.object()["Notas"].toArray();
-
-    // Itera sobre cada nota
-    for (const QJsonValue& valor : notasArray) {
-        QJsonObject obj = valor.toObject();
-        QString nota = obj["Nota"].toString();                    // Nombre de la nota (por ej. "C", "D#", etc.)
-        int octava = obj["Octava"].toInt();                       // Octava correspondiente
-        float offset = static_cast<float>(obj["Offset"].toDouble()); // Momento en segundos en el que debe caer la nota
-        QString codigo = nota + QString::number(octava);          // Código de nota (ej. "C4")
-        int delayMs = static_cast<int>(offset * 1000);            // Se convierte a milisegundos
-
-        // Creamos un temporizador normal
-        QTimer* timer = new QTimer(this);
-        timer->setSingleShot(true); // Se dispara una sola vez
-        timer->setInterval(delayMs);
-
-        // Lo agregamos a la lista de control
-        timersNotas.append(timer);
-
-        connect(timer, &QTimer::timeout, this, [=]() {
-            Tecla* teclaReal = nullptr;
-            for (Tecla* t : teclado->getTeclas()) {
-                if (t->getOctava() == octava && t->getNombres().contains(nota)) {
-                    teclaReal = t;
-                    break;
-                }
-            }
-            if (!teclaReal) return;
-
-            QRectF rect = teclaReal->mapRectToScene(teclaReal->boundingRect());
-            qreal duracionNota = obj["Duracion"].toDouble();
-            crearNotaCayendo(rect.x(), -rect.height(), teclaReal, duracionNota);
-
-            // Eliminar el temporizador una vez usado
             timersNotas.removeOne(timer);
             timer->deleteLater();
         });
@@ -171,9 +108,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     qreal x = (anchuraPantalla - mensaje->boundingRect().width()) / 2;
     qreal y = 100; // un poco desde arriba
     mensaje->setPos(x, y);
-
-    // Guardamos el JSON que estamos usando actualmente
-    jsonActual = ":/NeverMeantToBelong_Bleach.json";
 
     // Esperar 2 segundos antes de lanzar las notas (simula comienzo)
     QTimer::singleShot(2000, this, [=]() {
@@ -361,15 +295,6 @@ void MainWindow::mostrarCuentaAtras() {
             delete textoCuenta;
             delete indice;
             temporizador->deleteLater();
-
-            // Aquí es donde lanzamos las notas del JSON actual
-            /*
-            if (!jsonActual.isEmpty()) {
-                leerNotasDesdeJson(jsonActual);
-            } else {
-                qWarning("jsonActual está vacío. No se puede iniciar la canción.");
-            }
-            */
 
             leerNotasDesdeBaseDeDatos("ParaElisa", "Beethoven");
         }
