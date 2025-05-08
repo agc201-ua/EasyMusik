@@ -12,6 +12,9 @@
 #include <QJsonObject>
 #include <QTimer>
 #include <QKeyEvent>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
 
 
 /*
@@ -42,8 +45,9 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         MainWindow(QWidget *parent = nullptr);
         ~MainWindow();
         void probar();
-        void crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo);
+        void crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion);
         void leerNotasDesdeJson(const QString& ruta);
+        void leerNotasDesdeBaseDeDatos(const QString& titulo, const QString& autor);
         void keyPressEvent(QKeyEvent* event);
 
     private slots:
