@@ -51,6 +51,21 @@ class MusicXMLConverter:
             ".\\Audiveris\\Audiveris.exe",
             "-batch",
             "-export",
+            "-option", "org.audiveris.omr.sheet.BookManager.useSeparateBookFolders=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withText=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withLyrics=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withDynamics=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withArticulations=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withPedals=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withTitles=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withComposers=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withArrangers=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withTranscribers=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withRights=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withLyricTranslation=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withLyricsTranscription=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withLyricsSyllabification=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withLyricsHyphenation=false",
             self.archivo_pdf
         ]
 
@@ -134,8 +149,8 @@ class MusicXMLConverter:
             with open(self.archivo_json, "w", encoding="utf-8") as f:
                 json.dump(datos, f, indent=4, ensure_ascii=False)
         
-            with open(self.archivo_txt, "w", encoding="utf-8") as f:
-                f.write(datos_txt)
+            #with open(self.archivo_txt, "w", encoding="utf-8") as f:
+            #    f.write(datos_txt)
 
             print(f"Conversión a JSON completada.\nArchivo JSON guardado en: {self.archivo_json}")
             print(f"Archivo txt guardado en: {self.archivo_txt} \n\n")
