@@ -382,36 +382,33 @@ void MainWindow::cerrarAplicacion() {
 // Muestra un contador de 3, 2, 1, ¡YA! antes de lanzar la canción
 void MainWindow::mostrarCuentaAtras() {
     cuentaAtrasEnProceso = true;
+
+    // Diseñar el texto
     auto* textoCuenta = new QGraphicsTextItem();
     textoCuenta->setDefaultTextColor(Qt::white);
     textoCuenta->setFont(QFont("Arial", 100, QFont::Bold));
-    textoCuenta->setZValue(10);  // Encima de todo
-    textoCuenta->setFlag(QGraphicsItem::ItemIsSelectable, false);
-    textoCuenta->setFlag(QGraphicsItem::ItemIsFocusable, false);
-    textoCuenta->setFlag(QGraphicsItem::ItemClipsToShape, false);
-
-    //qreal x = anchuraPantalla / 2 - 100;
-    //qreal y = alturaPantalla / 2 - 100;
-    //textoCuenta->setPos(x, y);
-    //scene->addItem(textoCuenta);
-
+    textoCuenta->setZValue(10);  // Para posicionarlo encima de todo
     QStringList mensajes = { "3", "2", "1", "¡YA!" };
-    int* indice = new int(0); // Se necesita puntero para mantener valor entre llamadas
+    int* indice = new int(0); // Puntero para mantener el valor entre llamadas
 
+    // Comienza el timer
     QTimer* temporizador = new QTimer(this);
     connect(temporizador, &QTimer::timeout, this, [=]() mutable {
+        // Si aun hay mensajes, imprimirlos por pantalla
         if (*indice < mensajes.size()) {
+            // Centramos la posición del texto
             textoCuenta->setPlainText(mensajes[*indice]);
-
-            // Calcular el tamaño del texto actual
             QRectF bounds = textoCuenta->boundingRect();
             qreal xCentrado = (anchuraPantalla - bounds.width()) / 2;
             qreal yCentrado = (alturaPantalla - bounds.height()) / 2;
             textoCuenta->setPos(xCentrado, yCentrado);
-            scene->addItem(textoCuenta);
 
+            // Añadimos el elemento a la escena y movemos el puntero
+            scene->addItem(textoCuenta);
             (*indice)++;
-        } else {
+        }
+        // Si ya no quedan mensajes, se leen las notas de la base de datos
+        else {
             temporizador->stop();
             scene->removeItem(textoCuenta);
             delete textoCuenta;
