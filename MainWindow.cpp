@@ -119,11 +119,11 @@ void MainWindow::leerNotasDesdeJson(const QString& ruta) {
     // Itera sobre cada nota
     for (const QJsonValue& valor : notasArray) {
         QJsonObject obj = valor.toObject();
-        QString nota = obj["Nota"].toString();                    // Nombre de la nota (por ej. "C", "D#", etc.)
-        int octava = obj["Octava"].toInt();                       // Octava correspondiente
+        QString nota = obj["Nota"].toString();                       // Nombre de la nota (por ej. "C", "D#", etc.)
+        int octava = obj["Octava"].toInt();                          // Octava correspondiente
         float offset = static_cast<float>(obj["Offset"].toDouble()); // Momento en segundos en el que debe caer la nota
-        QString codigo = nota + QString::number(octava);          // Código de nota (ej. "C4")
-        int delayMs = static_cast<int>(offset * 1000);            // Se convierte a milisegundos
+        QString codigo = nota + QString::number(octava);             // Código de nota (ej. "C4")
+        int delayMs = static_cast<int>(offset * 1000);               // Se convierte a milisegundos
 
         // Creamos un temporizador normal
         QTimer* timer = new QTimer(this);
@@ -160,6 +160,7 @@ void MainWindow::leerNotasDesdeJson(const QString& ruta) {
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
     // Crear la escena
     scene = new QGraphicsScene(this);
+    scene->setBackgroundBrush(QColor("#212121"));
 
     // Crear la vista y configurarla
     view = new QGraphicsView(scene, this);
@@ -264,6 +265,7 @@ void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, 
                 }
                 audio->play();
 
+                /**/
                 QTimer::singleShot(duracion * 1000, this, [=]() {
                     // Timer para desvanecer el audio
                     QTimer* fadeTimer = new QTimer(this);
@@ -381,14 +383,17 @@ void MainWindow::cerrarAplicacion() {
 void MainWindow::mostrarCuentaAtras() {
     cuentaAtrasEnProceso = true;
     auto* textoCuenta = new QGraphicsTextItem();
-    textoCuenta->setDefaultTextColor(Qt::black);
+    textoCuenta->setDefaultTextColor(Qt::white);
     textoCuenta->setFont(QFont("Arial", 100, QFont::Bold));
     textoCuenta->setZValue(10);  // Encima de todo
+    textoCuenta->setFlag(QGraphicsItem::ItemIsSelectable, false);
+    textoCuenta->setFlag(QGraphicsItem::ItemIsFocusable, false);
+    textoCuenta->setFlag(QGraphicsItem::ItemClipsToShape, false);
 
-    qreal x = anchuraPantalla / 2 - 100;
-    qreal y = alturaPantalla / 2 - 100;
-    textoCuenta->setPos(x, y);
-    scene->addItem(textoCuenta);
+    //qreal x = anchuraPantalla / 2 - 100;
+    //qreal y = alturaPantalla / 2 - 100;
+    //textoCuenta->setPos(x, y);
+    //scene->addItem(textoCuenta);
 
     QStringList mensajes = { "3", "2", "1", "¡YA!" };
     int* indice = new int(0); // Se necesita puntero para mantener valor entre llamadas
@@ -397,6 +402,14 @@ void MainWindow::mostrarCuentaAtras() {
     connect(temporizador, &QTimer::timeout, this, [=]() mutable {
         if (*indice < mensajes.size()) {
             textoCuenta->setPlainText(mensajes[*indice]);
+
+            // Calcular el tamaño del texto actual
+            QRectF bounds = textoCuenta->boundingRect();
+            qreal xCentrado = (anchuraPantalla - bounds.width()) / 2;
+            qreal yCentrado = (alturaPantalla - bounds.height()) / 2;
+            textoCuenta->setPos(xCentrado, yCentrado);
+            scene->addItem(textoCuenta);
+
             (*indice)++;
         } else {
             temporizador->stop();
