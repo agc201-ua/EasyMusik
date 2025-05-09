@@ -40,6 +40,7 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         QList<QTimer*> timersNotas;  // Lista de timers para controlar las notas, para poder pausarlas y reiniciarlas.
         QList<QSoundEffect*> sonidosActivos;
         bool cuentaAtrasEnProceso = true;
+         QGraphicsTextItem* mensajePausa;
 
 
 
