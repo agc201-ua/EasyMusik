@@ -454,7 +454,7 @@ void MainWindow::mostrarCuentaAtras() {
             textoCuenta->setPlainText(mensajes[*indice]);
             QRectF bounds = textoCuenta->boundingRect();
             qreal xCentrado = (anchuraPantalla - bounds.width()) / 2;
-            qreal yCentrado = (alturaPantalla - bounds.height()) / 2;
+            qreal yCentrado =  (alturaPantalla * 0.25) - (alto / 2)
             textoCuenta->setPos(xCentrado, yCentrado);
 
             // Añadimos el elemento a la escena y movemos el puntero
