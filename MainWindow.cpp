@@ -184,7 +184,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     // Mostrar mensaje de pausa
     QGraphicsTextItem* mensaje = scene->addText("PULSA ESPACIO PARA PONER PAUSA");
-    mensaje->setDefaultTextColor(Qt::blue);
+    mensaje->setDefaultTextColor(Qt::white);
     QFont fuente("Arial", 24, QFont::Bold);
     mensaje->setFont(fuente);
 
@@ -215,12 +215,14 @@ MainWindow::~MainWindow() {
 
 // Crea una nota visual que cae desde una posición concreta y colisiona con una tecla
 void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion) {
-    qreal bpm = 75;
-    qreal segundosPorPulso = 60.0 / bpm; // Tiempo de una negra
-    qreal tiempoDuracionNota = duracion * segundosPorPulso; // Duración real en segundos
 
+    // Para luego tener en cuenta los pixeles por frame
     qreal pixelesPorDesplazamiento = 5;
     qreal intervaloEnMilisegundos = 30;
+
+    qreal bpm = 75; // Tempo de la canción
+    qreal segundosPorPulso = 60.0 / bpm; // Tiempo de una negra
+    qreal tiempoDuracionNota = duracion * segundosPorPulso; // Duración real en segundos
 
     qreal velocidadCaida = pixelesPorDesplazamiento / (intervaloEnMilisegundos / 1000.0);
 
@@ -230,7 +232,7 @@ void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, 
 
     // Crea un rectángulo que representa la nota cayendo
     auto* nota = new QGraphicsRectItem(0, 0, anchoNota, alturaNota);
-    nota->setBrush(Qt::cyan);              // Color amarillo
+    nota->setBrush(Qt::cyan);                // Color cyan
     nota->setPen(QPen(Qt::black));           // Borde negro
     nota->setZValue(-1);                     // Aparece detrás del teclado
     nota->setPos(posX, -alturaNota);         // Posición inicial fuera de pantalla
@@ -261,8 +263,6 @@ void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, 
                     audio->setVolume(0.5);
                 }
                 audio->play();
-
-
 
                 QTimer::singleShot(duracion * 1000, this, [=]() {
                     // Timer para desvanecer el audio
@@ -304,6 +304,12 @@ void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, 
 
 // Detecta pulsaciones de teclas
 void MainWindow::keyPressEvent(QKeyEvent* event) {
+
+    // Si se está haciendo la cuenta atrás, que no se pueda pausar el programa
+    if (cuentaAtrasEnProceso)
+        return;
+
+    // Si se pulsa el espacio...
     if (event->key() == Qt::Key_Space) {
         // Detiene el temporizador de las notas para que no se muevan
         for (QTimer* t : timersNotas) {
@@ -407,6 +413,7 @@ void MainWindow::mostrarCuentaAtras() {
             }
             */
 
+            cuentaAtrasEnProceso = false;
             leerNotasDesdeBaseDeDatos("1stGnossienne", "EricSatie");
         }
     });

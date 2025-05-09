@@ -38,6 +38,7 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         QString jsonActual; // Json que se esta leyendo actualmente
         QList<QTimer*> timersNotas;  // Lista de timers para controlar las notas, para poder pausarlas y reiniciarlas.
         QList<QSoundEffect*> sonidosActivos;
+        bool cuentaAtrasEnProceso = true;
 
 
         // Ui::MainWindow *ui;  // Puntero a la interfaz de usuario (UI) generada por Qt Designer
