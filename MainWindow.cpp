@@ -47,18 +47,18 @@ void MainWindow::leerNotasDesdeBaseDeDatos(const QString& titulo, const QString&
 
         for (const QJsonValue& valor : notasArray) {
             QJsonObject obj = valor.toObject();
-            QString nota = obj["Nota"].toString();
-            int octava = obj["Octava"].toInt();
-            float offset = static_cast<float>(obj["Offset"].toDouble());
-            QString codigo = nota + QString::number(octava);
-            int delayMs = qRound(offset * 1000.0);
+            QString nota = obj["Nota"].toString();                              //nota
+            int octava = obj["Octava"].toInt();                                 //nota
+            float offset = static_cast<float>(obj["Offset"].toDouble());        //nota
+            QString codigo = nota + QString::number(octava);                    //para conseguir posición tecla
+            int delayMs = qRound(offset * 1000.0);                              //transformar offset a ms(suponemos negra=1s)
 
             QTimer* timer = new QTimer(this);
             timer->setSingleShot(true);
-            timer->setInterval(delayMs);
+            timer->setInterval(delayMs);                    //temporizador
             timersNotas.append(timer);
 
-            connect(timer, &QTimer::timeout, this, [=]() {
+            connect(timer, &QTimer::timeout, this, [=]() {//evento para cuando muere el timer
                 Tecla* teclaReal = nullptr;
                 for (Tecla* t : teclado->getTeclas()) {
                     if (t->getOctava() == octava && t->getNombres().contains(nota)) {
@@ -67,10 +67,10 @@ void MainWindow::leerNotasDesdeBaseDeDatos(const QString& titulo, const QString&
                     }
                 }
                 if (!teclaReal) return;
-
+                                                            //rect = medidas tecla a la q se cae
                 QRectF rect = teclaReal->mapRectToScene(teclaReal->boundingRect());
-                qreal duracionNota = obj["Duracion"].toDouble();
-                crearNotaCayendo(rect.x(), -rect.height(), teclaReal, duracionNota);
+                qreal duracionNota = obj["Duracion"].toDouble();       //nota
+                crearNotaCayendo(rect.x(), -rect.height(), teclaReal, duracionNota); // altura rectángulo/aqui hay fallo
 
                 timersNotas.removeOne(timer);
                 timer->deleteLater();
@@ -120,7 +120,7 @@ void MainWindow::leerNotasDesdeJson(const QString& ruta) {
         float offset = static_cast<float>(obj["Offset"].toDouble()); // Momento en segundos en el que debe caer la nota
         QString codigo = nota + QString::number(octava);          // Código de nota (ej. "C4")
         int delayMs = static_cast<int>(offset * 1000);            // Se convierte a milisegundos
-
+        qDebug() << "1";
         // Creamos un temporizador normal
         QTimer* timer = new QTimer(this);
         timer->setSingleShot(true); // Se dispara una sola vez
@@ -177,25 +177,24 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
     // Crear el teclado y añadir sus teclas a la escena
     teclado = new Teclado(scene, anchuraPantalla, alturaPantalla);
+    scene->setSceneRect(0, 0, anchuraPantalla, alturaPantalla);
 
     // Mostrar mensaje de pausa
-    QGraphicsTextItem* mensaje = scene->addText("PULSA ESPACIO PARA PONER PAUSA");
-    mensaje->setDefaultTextColor(Qt::blue);
-    QFont fuente("Arial", 24, QFont::Bold);
-    mensaje->setFont(fuente);
+    mensajePausa = scene->addText("Pulse espacio para pausar");
+    mensajePausa->setDefaultTextColor(Qt::black);
+    QFont fuente("Arial", 18, QFont::Bold);
+    mensajePausa->setFont(fuente);
 
     // Centrar el texto horizontalmente
-    qreal x = (anchuraPantalla - mensaje->boundingRect().width()) / 2;
-    qreal y = 100; // un poco desde arriba
-    mensaje->setPos(x, y);
+    qreal x = (anchuraPantalla - mensajePausa->boundingRect().width()) / 2;
+    qreal y = alturaPantalla * 0.10 - mensajePausa->boundingRect().height();
+    mensajePausa->setPos(x, y);
 
     // Guardamos el JSON que estamos usando actualmente
     jsonActual = ":/NeverMeantToBelong_Bleach.json";
 
     // Esperar 2 segundos antes de lanzar las notas (simula comienzo)
-    QTimer::singleShot(2000, this, [=]() {
-        scene->removeItem(mensaje); // Elimina el mensaje
-        delete mensaje;
+    QTimer::singleShot(1000, this, [=]() {
 
         // Mostrar cuenta atrás y luego lanzar las notas
         mostrarCuentaAtras();
@@ -294,7 +293,7 @@ void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, 
 // Detecta pulsaciones de teclas
 void MainWindow::keyPressEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Space) {
-        for (QTimer* t : timersNotas) { // Detiene el temporizador de las otas para que no se muevan
+        for (QTimer* t : timersNotas) { // Detiene el temporizador de las notas para que no se muevan
             t->stop();  // Se pueden volver a arrancar más tarde
         }
         mostrarMenuPausa(); // Muestra el menú de pausa al pulsar barra espaciadora
@@ -304,17 +303,24 @@ void MainWindow::keyPressEvent(QKeyEvent* event) {
 // Muestra el diálogo de pausa
 void MainWindow::mostrarMenuPausa() {
     PausaDialog dialog(this);
+    QGraphicsBlurEffect* blur = new QGraphicsBlurEffect;
+    blur->setBlurRadius(8);  // Puedes ajustar el nivel de desenfoque
+    view->setGraphicsEffect(blur);
 
     // Conectar señales con acciones
     connect(&dialog, &PausaDialog::reiniciarClicked, this, &MainWindow::reiniciarCancion);
     connect(&dialog, &PausaDialog::salirClicked, this, &MainWindow::cerrarAplicacion);
+    connect(&dialog, &PausaDialog::continuarClicked, this, &MainWindow::reanudarCancion);
+
 
     dialog.exec(); // Abre el diálogo y bloquea hasta cerrarse
 
-    // Al cerrar el menú de pausa, reanuda las notas
-    for (QTimer* t : timersNotas) {
-        t->start();  // Esto reanuda el temporizador con su último intervalo (30 ms)
-    }
+    view->setGraphicsEffect(nullptr);  // Quita el desenfoque
+
+
+
+
+
 }
 
 // Reinicia la canción
@@ -349,6 +355,52 @@ void MainWindow::cerrarAplicacion() {
     qDebug() << "Saliendo de la app...";
     QCoreApplication::quit();
 }
+void MainWindow::reanudarCancion() {
+    auto* textoCuenta = new QGraphicsTextItem();
+    textoCuenta->setDefaultTextColor(Qt::black);
+    textoCuenta->setFont(QFont("Arial", 100, QFont::Bold));
+    textoCuenta->setZValue(10);  // Encima de todo
+
+    qreal anchoTexto = textoCuenta->boundingRect().width();
+    qreal altoTexto = textoCuenta->boundingRect().height();
+    textoCuenta->setPos(
+        (anchuraPantalla - anchoTexto) / 2,
+        (alturaPantalla * 0.25) - (altoTexto / 2)
+        );
+    scene->addItem(textoCuenta);
+
+    QStringList mensajes = { "3", "2", "1", "¡YA!" };
+    int* indice = new int(0);
+
+    QTimer* temporizador = new QTimer(this);
+    connect(temporizador, &QTimer::timeout, this, [=]() mutable {
+        if (*indice < mensajes.size()) {
+            textoCuenta->setPlainText(mensajes[*indice]);
+
+            qreal ancho = textoCuenta->boundingRect().width();
+            qreal alto = textoCuenta->boundingRect().height();
+            textoCuenta->setPos(
+                (anchuraPantalla - ancho) / 2,
+                (alturaPantalla * 0.25) - (alto / 2)
+                );
+
+            (*indice)++;
+        } else {
+            temporizador->stop();
+            scene->removeItem(textoCuenta);
+            delete textoCuenta;
+            delete indice;
+            temporizador->deleteLater();
+
+            for (QTimer* t : timersNotas) {
+                t->start();  // Esto reanuda el temporizador con su último intervalo (30 ms)
+            }
+        }
+    });
+
+    temporizador->start(1000);
+}
+
 
 // Muestra un contador de 3, 2, 1, ¡YA! antes de lanzar la canción
 void MainWindow::mostrarCuentaAtras() {
@@ -369,11 +421,22 @@ void MainWindow::mostrarCuentaAtras() {
     connect(temporizador, &QTimer::timeout, this, [=]() mutable {
         if (*indice < mensajes.size()) {
             textoCuenta->setPlainText(mensajes[*indice]);
+            qreal anchoTexto = textoCuenta->boundingRect().width();
+            qreal altoTexto = textoCuenta->boundingRect().height();
+            textoCuenta->setPos(
+                (anchuraPantalla - anchoTexto) / 2,
+                (alturaPantalla * 0.3) - (altoTexto / 2)
+                );
             (*indice)++;
         } else {
             temporizador->stop();
             scene->removeItem(textoCuenta);
             delete textoCuenta;
+
+            scene->removeItem(mensajePausa);
+            delete mensajePausa;
+            mensajePausa = nullptr;
+
             delete indice;
             temporizador->deleteLater();
 
@@ -386,7 +449,7 @@ void MainWindow::mostrarCuentaAtras() {
             }
             /**/
 
-            leerNotasDesdeBaseDeDatos("ParaElisa", "Beethoven");
+            leerNotasDesdeBaseDeDatos("1stGniossienne", "EricSatie");
         }
     });
 

@@ -15,6 +15,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QGraphicsBlurEffect>
 
 
 /*
@@ -37,6 +38,7 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         int alturaPantalla;
         QString jsonActual; // Json que se esta leyendo actualmente
         QList<QTimer*> timersNotas;  // Lista de timers para controlar las notas, para poder pausarlas y reiniciarlas.
+        QGraphicsTextItem* mensajePausa;
 
 
         // Ui::MainWindow *ui;  // Puntero a la interfaz de usuario (UI) generada por Qt Designer
@@ -54,6 +56,7 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         void mostrarMenuPausa();
         void reiniciarCancion();
         void cerrarAplicacion();
+        void reanudarCancion();
         void mostrarCuentaAtras();
 
 
