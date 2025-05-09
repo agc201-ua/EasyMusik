@@ -49,7 +49,9 @@ void MainWindow::leerNotasDesdeBaseDeDatos(const QString& titulo, const QString&
             QJsonObject obj = valor.toObject();
             QString nota = obj["Nota"].toString();
             int octava = obj["Octava"].toInt();
-            float offset = static_cast<float>(obj["Offset"].toDouble());
+            int bpm = 75;
+            qreal segundosPorPulso = 60.0 / bpm;
+            float offset = static_cast<float>(obj["Offset"].toDouble()) * segundosPorPulso;
             QString codigo = nota + QString::number(octava);
             int delayMs = qRound(offset * 1000.0);
 
@@ -70,6 +72,8 @@ void MainWindow::leerNotasDesdeBaseDeDatos(const QString& titulo, const QString&
 
                 QRectF rect = teclaReal->mapRectToScene(teclaReal->boundingRect());
                 qreal duracionNota = obj["Duracion"].toDouble();
+
+                // Se crea la nota cayendo
                 crearNotaCayendo(rect.x(), -rect.height(), teclaReal, duracionNota);
 
                 timersNotas.removeOne(timer);
@@ -211,13 +215,18 @@ MainWindow::~MainWindow() {
 
 // Crea una nota visual que cae desde una posición concreta y colisiona con una tecla
 void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion) {
-    //Velocidad de caida de la nota
+    qreal bpm = 75;
+    qreal segundosPorPulso = 60.0 / bpm; // Tiempo de una negra
+    qreal tiempoDuracionNota = duracion * segundosPorPulso; // Duración real en segundos
+
     qreal pixelesPorDesplazamiento = 5;
     qreal intervaloEnMilisegundos = 30;
 
+    qreal velocidadCaida = pixelesPorDesplazamiento / (intervaloEnMilisegundos / 1000.0);
+
     // Tamaño igual que la tecla objetivo
     qreal anchoNota = teclaObjetivo->boundingRect().width();
-    qreal alturaNota = duracion * pixelesPorDesplazamiento / (intervaloEnMilisegundos / 1000);
+    qreal alturaNota = tiempoDuracionNota * velocidadCaida;
 
     // Crea un rectángulo que representa la nota cayendo
     auto* nota = new QGraphicsRectItem(0, 0, anchoNota, alturaNota);
@@ -228,6 +237,7 @@ void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, 
     scene->addItem(nota);
 
     QSoundEffect *audio = new QSoundEffect();
+    sonidosActivos.append(audio);
     bool audioCargado = false;
 
     // Crea un temporizador para mover la nota continuamente
@@ -265,6 +275,7 @@ void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, 
                         if (nuevoVol <= 0.0) {
                             audio->stop();
                             audio->deleteLater();
+                            sonidosActivos.removeOne(audio);
                             fadeTimer->stop();
                             fadeTimer->deleteLater();
                         } else {
@@ -294,10 +305,19 @@ void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, 
 // Detecta pulsaciones de teclas
 void MainWindow::keyPressEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Space) {
-        for (QTimer* t : timersNotas) { // Detiene el temporizador de las otas para que no se muevan
-            t->stop();  // Se pueden volver a arrancar más tarde
+        // Detiene el temporizador de las notas para que no se muevan
+        for (QTimer* t : timersNotas) {
+            t->stop();
         }
-        mostrarMenuPausa(); // Muestra el menú de pausa al pulsar barra espaciadora
+        // Detiene todos los sonidos activos del fadeout
+        for (QSoundEffect* sonido : sonidosActivos) {
+            sonido->stop();
+            sonido->deleteLater();
+        }
+        sonidosActivos.clear();
+
+        // Muestra el menú de pausa al pulsar barra espaciadora
+        mostrarMenuPausa();
     }
 }
 
@@ -325,6 +345,7 @@ void MainWindow::reiniciarCancion() {
         t->deleteLater();
     }
     timersNotas.clear();
+
     // Elimina todas las notas que estén en pantalla (Z=-1 indica nota cayendo)
     for (QGraphicsItem* item : scene->items()) {
         if (item->zValue() == -1) {
@@ -384,9 +405,9 @@ void MainWindow::mostrarCuentaAtras() {
             } else {
                 qWarning("jsonActual está vacío. No se puede iniciar la canción.");
             }
-            /**/
+            */
 
-            leerNotasDesdeBaseDeDatos("ParaElisa", "Beethoven");
+            leerNotasDesdeBaseDeDatos("1stGnossienne", "EricSatie");
         }
     });
 
