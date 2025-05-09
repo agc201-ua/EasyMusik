@@ -15,6 +15,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QGraphicsBlurEffect>
 
 
 /*
@@ -41,6 +42,7 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         bool cuentaAtrasEnProceso = true;
 
 
+
         // Ui::MainWindow *ui;  // Puntero a la interfaz de usuario (UI) generada por Qt Designer
 
     public:
@@ -56,6 +58,7 @@ class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` d
         void mostrarMenuPausa();
         void reiniciarCancion();
         void cerrarAplicacion();
+        void reanudarCancion();
         void mostrarCuentaAtras();
 
 

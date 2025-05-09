@@ -18,6 +18,8 @@ public:
 signals:
     void reiniciarClicked();
     void salirClicked();
+    void continuarClicked();
+
 
 private:
     Ui::PausaDialog *ui;
