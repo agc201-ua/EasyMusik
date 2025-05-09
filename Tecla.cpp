@@ -118,7 +118,7 @@ void Tecla::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
 
     // Tecla iluminada
     if (iluminada) {
-        painter->setBrush(QBrush(Qt::blue));
+        painter->setBrush(QBrush(Qt::darkCyan));
         painter->setPen(QPen(Qt::black));
     }
 

@@ -230,10 +230,10 @@ void MainWindow::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, 
 
     // Crea un rectángulo que representa la nota cayendo
     auto* nota = new QGraphicsRectItem(0, 0, anchoNota, alturaNota);
-    nota->setBrush(Qt::yellow);              // Cambiado a amarillo para visibilidad
-    nota->setPen(QPen(Qt::black));                 // Borde negro
+    nota->setBrush(Qt::cyan);              // Color amarillo
+    nota->setPen(QPen(Qt::black));           // Borde negro
     nota->setZValue(-1);                     // Aparece detrás del teclado
-    nota->setPos(posX, -alturaNota);                // Posición inicial fuera de pantalla
+    nota->setPos(posX, -alturaNota);         // Posición inicial fuera de pantalla
     scene->addItem(nota);
 
     QSoundEffect *audio = new QSoundEffect();
