@@ -379,6 +379,7 @@ void MainWindow::cerrarAplicacion() {
 
 // Muestra un contador de 3, 2, 1, ¡YA! antes de lanzar la canción
 void MainWindow::mostrarCuentaAtras() {
+    cuentaAtrasEnProceso = true;
     auto* textoCuenta = new QGraphicsTextItem();
     textoCuenta->setDefaultTextColor(Qt::black);
     textoCuenta->setFont(QFont("Arial", 100, QFont::Bold));
