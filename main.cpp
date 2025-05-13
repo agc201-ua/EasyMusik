@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv); // Inicializa la aplicación Qt
 
-    // 🔥 Llamada a la función de prueba que creará las teclas
+    // Llamada a la función de prueba que creará las teclas
     //testTeclas();  // Esta línea llama a la función que ejecuta las pruebas de la clase Tecla
 
     // Creamos la ventana principal de la aplicación, la cual está definida en `mainwindow.ui` (Qt Designer)

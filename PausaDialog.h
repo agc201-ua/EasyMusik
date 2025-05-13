@@ -20,7 +20,6 @@ signals:
     void salirClicked();
     void continuarClicked();
 
-
 private:
     Ui::PausaDialog *ui;
 };

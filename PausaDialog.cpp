@@ -13,7 +13,11 @@ PausaDialog::PausaDialog(QWidget *parent)
         emit reiniciarClicked();  // Lanza la señal
         this->accept();           // Cierra el diálogo automáticamente
     });
-    connect(ui->btnSalir, &QPushButton::clicked, this, &PausaDialog::salirClicked);
+    // connect(ui->btnSalir, &QPushButton::clicked, this, &PausaDialog::salirClicked);
+    connect(ui->btnSalir, &QPushButton::clicked, this, [=]() {
+        emit salirClicked();      // Lanza la señal
+        this->accept();           // Cierra el diálogo automáticamente
+    });
     connect(ui->btnContinuar, &QPushButton::clicked, this, [=]() {
         emit continuarClicked();   // Lanza la señal
         this->accept();            // Cierra el diálogo automáticamente
