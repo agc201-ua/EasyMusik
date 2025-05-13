@@ -23,6 +23,7 @@ class Teclado {
 
         // Métodos
         void calcularDimensiones(int anchuraPantalla);
+        void posicionarTeclas(QGraphicsScene* scene, int alturaPantalla);
 
     public:
         // Constructor y destructor
@@ -38,11 +39,5 @@ class Teclado {
         qreal getAlturaTeclaBlanca();
         qreal getAnchuraTeclaNegra();
         qreal getAlturaTeclaNegra();
-
-        // Métodos adicionalesss
-        void posicionarTeclas(QGraphicsScene* scene, int alturaPantalla);
-        /*qreal obtenerXdeCodigo(QString codigo);
-        QPair<qreal, bool> obtenerDatosTecla(QString codigo);*/
-
 };
 #endif
