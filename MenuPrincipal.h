@@ -25,7 +25,6 @@ public:
     CancionItem(const QString &titulo, const QString &artista, QWidget *parent = nullptr);
     QString getTitulo() const { return tituloCancion; }
     QString getArtista() const { return artistaCancion; }
-    // qreal getBpm() const { return bpmCancion; }
 
 signals:
     void playCancion(const QString &titulo, const QString &artista);
@@ -33,7 +32,6 @@ signals:
 private:
     QString tituloCancion;
     QString artistaCancion;
-    // qreal bpmCancion;
     QLabel *tituloLabel;
     QLabel *artistaLabel;
     QPushButton *playButton;
@@ -44,7 +42,6 @@ class MenuPrincipal : public QWidget {
     Q_OBJECT
 
 signals:
-    // void playCancion(const QString &titulo, const QString &artista, const QString &jsonPath);
     void playCancion(const QString &titulo, const QString &artista);
 
 private:
@@ -56,12 +53,11 @@ private:
     QPushButton *btnAgregar;
     QSqlDatabase db;
     // Métodos
-    void cargarCancionesDesdeBD();
     void inicializarUI();
+    void cargarCancionesDesdeBD();
     bool conectarBaseDeDatos();
     void agregarNuevaCancion();
     void onPlayCancion(const QString &titulo, const QString &artista);
-    QString obtenerRutaArchivo(const QString &titulo, const QString &artista);
 
 public:
     MenuPrincipal(QWidget *parent = nullptr);

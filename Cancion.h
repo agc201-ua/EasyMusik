@@ -36,20 +36,14 @@ signals:
     void volver();
 
 private:
-    //
-    void inicializarUI();
+    // Atributos para la interfaz
     QVBoxLayout* mainLayout;
-
-    // Gestor de eventos
-    void keyPressEvent(QKeyEvent* event) override;
-
-    // Elementos de la interfaz
     QGraphicsScene* scene;
     QGraphicsView* view;
     Teclado* teclado;
     QGraphicsTextItem* mensajePausa;
 
-    // Gestión del tiempo y pausas
+    // Atributos para la gestión del tiempo y pausas
     QElapsedTimer cancionTimer;       // Mide el tiempo total desde el inicio
     qint64 tiempoPausaAcumulado = 0;  // Tiempo acumulado en pausas
     qint64 tiempoInicioPausa = 0;     // Momento en el que comenzó la pausa actual
@@ -67,14 +61,13 @@ private:
     };
     QList<NotaCayendo> notasCayendo;
 
-    // Dimensiones de la pantalla
+    // Atributos para las dimensiones de la pantalla
     qreal anchuraPantalla;
     qreal alturaPantalla;
 
-    // Información sobre al canción
+    // Atributos para guardar información sobre al canción
     QString nombreCancion;
     QString nombreArtista;
-    // QString jsonPath;
     qreal bpm;
 
     // Otros atributos
@@ -82,9 +75,13 @@ private:
     QList<QTimer*> timersNotas;
     QList<QSoundEffect*> sonidosActivos;
 
-    // Métodos para gestión de la UI
+    // Métodos para la interfaz
+    void inicializarUI();
     void mostrarMenuPausa();
     void mostrarCuentaAtras(std::function<void()> callbackAlTerminar = nullptr);
+
+    // Gestor de eventos
+    void keyPressEvent(QKeyEvent* event) override;
 
     // Métodos para gestión de la canción
     void iniciarCancion();
@@ -92,7 +89,6 @@ private:
     void reanudarCancion();
     void reiniciarCancion();
     void finalizarCancion();
-    void crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion);
 
     // Métodos para cargar las notas
     void leerNotasDesdeJson(const QString& ruta);
@@ -100,6 +96,7 @@ private:
 
     // Métodos para la gestión de notas y timers
     void programarNotasCayendo();
+    void crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion);
     void crearNotaCayendo(int indice);
     void actualizarTimersNotas();
 

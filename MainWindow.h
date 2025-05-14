@@ -12,6 +12,7 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    //void volverAlMenu();
 
 private slots:
     void mostrarCancion(const QString &titulo, const QString &artista);

@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QScreen>
 #include <QFile>
+#include <QProcess>
 #include <QMouseEvent>
 
 // Constructor del widget de canción individual
@@ -85,7 +86,7 @@ CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget 
     });
 }
 
-// Constructor del menú principal
+// Constructor
 MenuPrincipal::MenuPrincipal(QWidget *parent) : QWidget(parent) {
     // Inicializar la interfaz
     inicializarUI();
@@ -99,12 +100,14 @@ MenuPrincipal::MenuPrincipal(QWidget *parent) : QWidget(parent) {
     }
 }
 
+// Destructor
 MenuPrincipal::~MenuPrincipal() {
     if (db.isOpen()) {
         db.close();
     }
 }
 
+// Inicializamos la interfaz
 void MenuPrincipal::inicializarUI() {
     // Layout principal
     mainLayout = new QVBoxLayout(this);
@@ -184,7 +187,35 @@ bool MenuPrincipal::conectarBaseDeDatos() {
     QDir dir(rutaBase);
     dir.cdUp(); // Sube un nivel a build
     dir.cdUp(); // Sube un nivel a EasyMusik
+    QString rutaEM = dir.absolutePath();
     QString rutaDB = dir.filePath("canciones.db");
+
+    // Se comprueba si ya existe la base de datos
+    bool existeDB = QFile::exists(rutaDB);
+
+    // Si no existe la base de datos, se ejecuta el script para crearla
+    if (!existeDB) {
+        QString directorioOriginal = QDir::currentPath();
+        QString scriptPath = rutaEM + "/scriptBD.py";
+
+        // Cambiar al directorio de trabajo
+        if (!QDir::setCurrent(rutaEM)) {
+            qDebug() << "Error: No se pudo cambiar al directorio" << rutaEM;
+            return false;
+        }
+
+        // Ejecutar el script
+        int resultado = QProcess::execute("python", QStringList() << "scriptBD.py");
+
+        // Comprobar si se ha ejecutado el script correctamente
+        if (resultado != 0) {
+            qDebug() << "Error al ejecutar el script Python. Código de salida:" << resultado;
+            return false;
+        }
+
+        // Restaurar el directorio original
+        QDir::setCurrent(directorioOriginal);
+    }
 
     // Configurar el nombre de la base de datos
     db.setDatabaseName(rutaDB);

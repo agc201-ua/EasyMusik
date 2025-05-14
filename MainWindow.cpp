@@ -58,14 +58,12 @@ void MainWindow::mostrarCancion(const QString &titulo, const QString &artista) {
 
 // Slot para volver al menú principal
 void MainWindow::volverAlMenu() {
-    // Volver a la ventana normal (no pantalla completa)
-    // showNormal();
-
     // Si hay una canción activa, cambiar a menú y eliminar la canción
     if (cancionActual) {
         stackedWidget->removeWidget(cancionActual);
-        stackedWidget->setCurrentWidget(menuPrincipal);
         delete cancionActual;
         cancionActual = nullptr;
     }
+
+    stackedWidget->setCurrentWidget(menuPrincipal);
 }

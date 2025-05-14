@@ -100,10 +100,46 @@ Cancion::Cancion(QWidget *parent, QString cancion, QString artista) {
 }
 
 // Destructor
-Cancion::~Cancion() {
-    delete scene;
-    delete view;
-    delete teclado;
+Cancion::~Cancion() {    
+    // Detener todos los timers y animaciones
+    for (QTimer* t : timersNotas) {
+        if (t) {
+            t->disconnect();
+            delete t;
+        }
+    }
+    timersNotas.clear();
+
+    // Limpiar los timers de notas cayendo
+    for (auto& nota : notasCayendo) {
+        if (nota.timer) {
+            nota.timer->disconnect();
+            delete nota.timer;
+        }
+    }
+    notasCayendo.clear();
+
+    // Detener y limpiar sonidos activos
+    for (QSoundEffect* sonido : sonidosActivos) {
+        if (sonido) {
+            delete sonido;
+        }
+    }
+    sonidosActivos.clear();
+
+    // Eliminar elementos restantes en la escena
+    if (teclado) {
+        delete teclado;
+    }
+
+    if (scene) {
+        scene->clear();
+        delete scene;
+    }
+
+    if (view) {
+        delete view;
+    }
 }
 
 //Carga la cancion pasada en los parametros de la base de datos si esta guardada
@@ -156,37 +192,6 @@ void Cancion::leerNotasDesdeBaseDeDatos() {
     db.close();
     QSqlDatabase::removeDatabase("Verificador"); // Limpia la conexión
 }
-
-/*
-// Carga un archivo JSON con notas musicales y programa su aparición en pantalla
-void Cancion::leerNotasDesdeJson(const QString& ruta) {
-    QFile archivo(ruta);
-
-    // Abre el archivo en modo solo lectura
-    if (!archivo.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning("No se pudo abrir el archivo JSON.");
-        return;
-    }
-
-    // Lee el contenido completo del archivo y lo cierra
-    QByteArray datos = archivo.readAll();
-    archivo.close();
-
-    // Intenta interpretar los datos como un documento JSON
-    QJsonDocument doc = QJsonDocument::fromJson(datos);
-    if (!doc.isObject()) {
-        qWarning("El JSON no es un objeto.");
-        return;
-    }
-
-    // Extrae el array de notas del JSON
-    notasJson = doc.object()["Notas"].toArray();
-    indiceNotaActual = 0;
-
-    // Iniciar la reproducción con el nuevo sistema de tiempo
-    programarNotasCayendo();
-}
-*/
 
 // Iniciar la canción
 void Cancion::iniciarCancion() {
@@ -257,6 +262,103 @@ void Cancion::crearNotaCayendo(int indice) {
     // Se actualiza el índice de nota actual
     if (indice == indiceNotaActual) {
         indiceNotaActual++;
+    }
+}
+
+// Crea una nota visual que cae desde una posición concreta y colisiona con una tecla
+void Cancion::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion) {
+    // Se definen los pixeles que caerán por frame
+    qreal pixelesPorDesplazamiento = 5;
+    qreal intervaloEnMilisegundos = 30;
+
+    qreal segundosPorPulso = 60.0 / bpm; // Tiempo de una negra
+    qreal tiempoDuracionNota = duracion * segundosPorPulso; // Duración real en segundos
+
+    qreal velocidadCaida = pixelesPorDesplazamiento / (intervaloEnMilisegundos / 1000.0);
+
+    // Se define el tamaño de la nota (tamaño igual que la tecla objetivo con la que colisionará)
+    qreal anchoNota = teclaObjetivo->boundingRect().width();
+    qreal alturaNota = tiempoDuracionNota * velocidadCaida;
+
+    // Se crea un rectángulo que representa la nota cayendo
+    auto* nota = new QGraphicsRectItem(0, 0, anchoNota, alturaNota);
+    nota->setBrush(Qt::cyan);                // Color cyan
+    nota->setPen(QPen(Qt::black));           // Borde negro
+    nota->setZValue(-1);                     // Aparece detrás del teclado
+    nota->setPos(posX, -alturaNota);         // Posición inicial fuera de pantalla
+
+    // Se añade la nota a la escena
+    scene->addItem(nota);
+
+    // Se crea el sonido de audio
+    QSoundEffect *audio = new QSoundEffect();
+    sonidosActivos.append(audio);
+    bool audioCargado = false;
+
+    // Se crea un temporizador para mover la nota continuamente
+    QTimer* timer = new QTimer(this);
+    timersNotas.append(timer); // Guarda este temporizador de movimiento
+    connect(timer, &QTimer::timeout, this, [=]() mutable {
+        nota->moveBy(0, pixelesPorDesplazamiento);  // Desplaza hacia abajo tantos pixeles como definidos anteriormente
+
+        // Si está cerca de la tecla objetivo, se ilumina
+        if (nota->y() + alturaNota > teclaObjetivo->scenePos().y()) {
+            teclaObjetivo->iluminar();
+
+            // Se carga el sonido al colisionar con la tecla objetivo
+            if (!audioCargado) {
+                audioCargado = true;
+                audio->setSource(QUrl::fromLocalFile(teclaObjetivo->getRutaAudio()));
+                audio->setLoopCount(1);
+
+                if (teclaObjetivo->getOctava() <= 3) {
+                    audio->setVolume(0.3);
+                } else {
+                    audio->setVolume(0.5);
+                }
+
+                audio->play();
+
+                // Se crea un timer para desvanecer el audio
+                QTimer::singleShot(duracion * 1000, this, [=]() {
+                    QTimer* fadeTimer = new QTimer(this);
+                    fadeTimer->setInterval(intervaloEnMilisegundos);
+
+                    connect(fadeTimer, &QTimer::timeout, this, [=]() mutable {
+                        qreal volActual = audio->volume();
+                        qreal nuevoVol = volActual - 0.025;
+
+                        // Si acaba de producirse el audio, se paran los sonidos y sus temporizadores respectivos
+                        if (nuevoVol <= 0.0) {
+                            audio->stop();
+                            audio->deleteLater();
+                            sonidosActivos.removeOne(audio);
+                            fadeTimer->stop();
+                            fadeTimer->deleteLater();
+                        } else {
+                            audio->setVolume(nuevoVol);
+                        }
+                    });
+
+                    fadeTimer->start();
+                });
+            }
+        }
+
+        // Si la nota cayendo se sale de la pantalla, esta se elimina y se apaga la tecla del teclado
+        if (nota->y() > alturaPantalla - teclaObjetivo->getAltura()) {
+            timer->stop();
+            timersNotas.removeOne(timer);
+            timer->deleteLater();
+            teclaObjetivo->apagar();
+            scene->removeItem(nota);
+            delete nota;
+        }
+    });
+
+    // Si la canción no está en pausa entonces se inicia el timer
+    if (!cancionEnPausa) {
+        timer->start(intervaloEnMilisegundos);
     }
 }
 
@@ -465,8 +567,9 @@ void Cancion::finalizarCancion() {
     if (cancionReproduciendo && !cancionEnPausa)
         pausarCancion();
 
-    qDebug() << "Volviendo al menú principal...";
-    emit volver();
+    QTimer::singleShot(0, this, [this]() {
+        emit volver();
+    });
 }
 
 // Reanudar la canción
@@ -490,101 +593,4 @@ void Cancion::reanudarCancion() {
         // Reprogramar todas las notas pendientes
         actualizarTimersNotas();
     });
-}
-
-// Crea una nota visual que cae desde una posición concreta y colisiona con una tecla
-void Cancion::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion) {
-    // Se definen los pixeles que caerán por frame
-    qreal pixelesPorDesplazamiento = 5;
-    qreal intervaloEnMilisegundos = 30;
-
-    qreal segundosPorPulso = 60.0 / bpm; // Tiempo de una negra
-    qreal tiempoDuracionNota = duracion * segundosPorPulso; // Duración real en segundos
-
-    qreal velocidadCaida = pixelesPorDesplazamiento / (intervaloEnMilisegundos / 1000.0);
-
-    // Se define el tamaño de la nota (tamaño igual que la tecla objetivo con la que colisionará)
-    qreal anchoNota = teclaObjetivo->boundingRect().width();
-    qreal alturaNota = tiempoDuracionNota * velocidadCaida;
-
-    // Se crea un rectángulo que representa la nota cayendo
-    auto* nota = new QGraphicsRectItem(0, 0, anchoNota, alturaNota);
-    nota->setBrush(Qt::cyan);                // Color cyan
-    nota->setPen(QPen(Qt::black));           // Borde negro
-    nota->setZValue(-1);                     // Aparece detrás del teclado
-    nota->setPos(posX, -alturaNota);         // Posición inicial fuera de pantalla
-
-    // Se añade la nota a la escena
-    scene->addItem(nota);
-
-    // Se crea el sonido de audio
-    QSoundEffect *audio = new QSoundEffect();
-    sonidosActivos.append(audio);
-    bool audioCargado = false;
-
-    // Se crea un temporizador para mover la nota continuamente
-    QTimer* timer = new QTimer(this);
-    timersNotas.append(timer); // Guarda este temporizador de movimiento
-    connect(timer, &QTimer::timeout, this, [=]() mutable {
-        nota->moveBy(0, pixelesPorDesplazamiento);  // Desplaza hacia abajo tantos pixeles como definidos anteriormente
-
-        // Si está cerca de la tecla objetivo, se ilumina
-        if (nota->y() + alturaNota > teclaObjetivo->scenePos().y()) {
-            teclaObjetivo->iluminar();
-
-            // Se carga el sonido al colisionar con la tecla objetivo
-            if (!audioCargado) {
-                audioCargado = true;
-                audio->setSource(QUrl::fromLocalFile(teclaObjetivo->getRutaAudio()));
-                audio->setLoopCount(1);
-
-                if (teclaObjetivo->getOctava() <= 3) {
-                    audio->setVolume(0.3);
-                } else {
-                    audio->setVolume(0.5);
-                }
-
-                audio->play();
-
-                // Se crea un timer para desvanecer el audio
-                QTimer::singleShot(duracion * 1000, this, [=]() {
-                    QTimer* fadeTimer = new QTimer(this);
-                    fadeTimer->setInterval(intervaloEnMilisegundos);
-
-                    connect(fadeTimer, &QTimer::timeout, this, [=]() mutable {
-                        qreal volActual = audio->volume();
-                        qreal nuevoVol = volActual - 0.025;
-
-                        // Si acaba de producirse el audio, se paran los sonidos y sus temporizadores respectivos
-                        if (nuevoVol <= 0.0) {
-                            audio->stop();
-                            audio->deleteLater();
-                            sonidosActivos.removeOne(audio);
-                            fadeTimer->stop();
-                            fadeTimer->deleteLater();
-                        } else {
-                            audio->setVolume(nuevoVol);
-                        }
-                    });
-
-                    fadeTimer->start();
-                });
-            }
-        }
-
-        // Si la nota cayendo se sale de la pantalla, esta se elimina y se apaga la tecla del teclado
-        if (nota->y() > alturaPantalla - teclaObjetivo->getAltura()) {
-            timer->stop();
-            timersNotas.removeOne(timer);
-            timer->deleteLater();
-            teclaObjetivo->apagar();
-            scene->removeItem(nota);
-            delete nota;
-        }
-    });
-
-    // Si la canción no está en pausa entonces se inicia el timer
-    if (!cancionEnPausa) {
-        timer->start(intervaloEnMilisegundos);
-    }
 }
