@@ -155,6 +155,8 @@ void MenuPrincipal::inicializarUI() {
         "    background-color: cyan;"
         "    color: white;"
         "    border-radius: 30px;"
+        "    qproperty-alignment: AlignCenter;"
+        "    padding-bottom: 7px;"
         "}"
         "QPushButton:hover {"
         "    background-color: darkCyan;"
