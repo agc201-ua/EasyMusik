@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS Partituras (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     titulo TEXT NOT NULL,
     autor TEXT NOT NULL,
+    bpm INT NOT NULL,
     contenido TEXT NOT NULL,
     UNIQUE(titulo, autor)
 )

@@ -74,7 +74,7 @@ private:
     // Información sobre al canción
     QString nombreCancion;
     QString nombreArtista;
-    QString jsonPath;
+    // QString jsonPath;
     qreal bpm;
 
     // Otros atributos
@@ -96,7 +96,7 @@ private:
 
     // Métodos para cargar las notas
     void leerNotasDesdeJson(const QString& ruta);
-    void leerNotasDesdeBaseDeDatos(const QString& titulo, const QString& autor);
+    void leerNotasDesdeBaseDeDatos();
 
     // Métodos para la gestión de notas y timers
     void programarNotasCayendo();
@@ -104,7 +104,7 @@ private:
     void actualizarTimersNotas();
 
 public:
-    Cancion(QWidget *parent, QString cancion, QString artista, QString path);
+    Cancion(QWidget *parent, QString cancion, QString artista);
     ~Cancion();
 };
 

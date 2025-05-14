@@ -22,16 +22,18 @@
 class CancionItem : public QWidget {
     Q_OBJECT
 public:
-    explicit CancionItem(const QString &titulo, const QString &artista, QWidget *parent = nullptr);
-    QString getTitulo() const { return m_titulo; }
-    QString getArtista() const { return m_artista; }
+    CancionItem(const QString &titulo, const QString &artista, QWidget *parent = nullptr);
+    QString getTitulo() const { return tituloCancion; }
+    QString getArtista() const { return artistaCancion; }
+    // qreal getBpm() const { return bpmCancion; }
 
 signals:
     void playCancion(const QString &titulo, const QString &artista);
 
 private:
-    QString m_titulo;
-    QString m_artista;
+    QString tituloCancion;
+    QString artistaCancion;
+    // qreal bpmCancion;
     QLabel *tituloLabel;
     QLabel *artistaLabel;
     QPushButton *playButton;
@@ -40,29 +42,30 @@ private:
 // Clase principal del menú
 class MenuPrincipal : public QWidget {
     Q_OBJECT
-public:
-    explicit MenuPrincipal(QWidget *parent = nullptr);
-    ~MenuPrincipal();
 
 signals:
-    void playCancion(const QString &titulo, const QString &artista, const QString &jsonPath);
-
-private slots:
-    void agregarNuevaCancion();
-    void onPlayCancion(const QString &titulo, const QString &artista);
+    // void playCancion(const QString &titulo, const QString &artista, const QString &jsonPath);
+    void playCancion(const QString &titulo, const QString &artista);
 
 private:
-    void cargarCancionesDesdeBD();
-    void inicializarUI();
-    bool conectarBaseDeDatos();
-    QString obtenerRutaArchivo(const QString &titulo, const QString &artista);
-
+    // Atributos
     QVBoxLayout *mainLayout;
     QScrollArea *scrollArea;
     QWidget *contenedorCanciones;
     QVBoxLayout *cancionesLayout;
     QPushButton *btnAgregar;
     QSqlDatabase db;
+    // Métodos
+    void cargarCancionesDesdeBD();
+    void inicializarUI();
+    bool conectarBaseDeDatos();
+    void agregarNuevaCancion();
+    void onPlayCancion(const QString &titulo, const QString &artista);
+    QString obtenerRutaArchivo(const QString &titulo, const QString &artista);
+
+public:
+    MenuPrincipal(QWidget *parent = nullptr);
+    ~MenuPrincipal();
 };
 
 #endif // MENUPRINCIPAL_H

@@ -3,39 +3,6 @@
 #include <QFileInfo>
 #include <QDir>
 
-
-/*
-// Inicializar la interfaz
-void Cancion::inicializarUI() {
-    // Se crea la escena
-    scene = new QGraphicsScene(this);
-    scene->setBackgroundBrush(QColor("#212121"));
-
-    // Se crea y se configura la vista
-    view = new QGraphicsView(scene, this);
-    // setCentralWidget(view);
-    view->setRenderHint(QPainter::Antialiasing); // Mejorar la calidad del renderizado
-
-    // Hacer que la ventana se abra en pantalla completa
-    showFullScreen();
-
-    // Deshabilitar el scroll
-    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    // Se obtenen las dimensiones de la pantalla
-    QScreen *screen = QGuiApplication::primaryScreen();
-    QRect screenGeometry = screen->geometry();
-    anchuraPantalla = screenGeometry.width();
-    alturaPantalla = screenGeometry.height();
-
-    // Se crea el teclado y se añaden sus teclas a la escena
-    teclado = new Teclado(scene, anchuraPantalla, alturaPantalla);
-    scene->setSceneRect(0, 0, anchuraPantalla, alturaPantalla);
-}
-
-*/
-
 // Inicializar la interfaz
 void Cancion::inicializarUI() {
     // Crear layout principal para el widget
@@ -77,13 +44,12 @@ void Cancion::inicializarUI() {
     teclado = new Teclado(scene, anchuraPantalla, alturaPantalla);
 }
 
-Cancion::Cancion(QWidget *parent, QString cancion, QString artista, QString path) {
+// Constructor
+Cancion::Cancion(QWidget *parent, QString cancion, QString artista) {
 
-    // Se define el nombre, el artista, el path y el tempo de la canción
+    // Se define el nombre, el artista, y el tempo de la canción
     nombreCancion = cancion;
     nombreArtista = artista;
-    jsonPath = path;
-    bpm = 142;
 
     // Se inicializa la interfaz gráfica
     inicializarUI();
@@ -129,7 +95,7 @@ Cancion::Cancion(QWidget *parent, QString cancion, QString artista, QString path
         cancionTimer.start();
         cancionReproduciendo = true;
 
-        leerNotasDesdeBaseDeDatos(nombreCancion, nombreArtista);
+        leerNotasDesdeBaseDeDatos();
     });
 }
 
@@ -141,7 +107,7 @@ Cancion::~Cancion() {
 }
 
 //Carga la cancion pasada en los parametros de la base de datos si esta guardada
-void Cancion::leerNotasDesdeBaseDeDatos(const QString& titulo, const QString& autor) {
+void Cancion::leerNotasDesdeBaseDeDatos() {
     QSqlDatabase::removeDatabase("QSQLITE");
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 
@@ -160,9 +126,9 @@ void Cancion::leerNotasDesdeBaseDeDatos(const QString& titulo, const QString& au
     qDebug() << "Ruta absoluta de la base de datos:" << QFileInfo(db.databaseName()).absoluteFilePath();
 
     QSqlQuery query;
-    QString string_query = QString("SELECT contenido FROM Partituras WHERE titulo = '%1' AND autor = '%2'")
-                               .arg(titulo)
-                               .arg(autor);
+    QString string_query = QString("SELECT contenido, bpm FROM Partituras WHERE titulo = '%1' AND autor = '%2'")
+                               .arg(nombreCancion)
+                               .arg(nombreArtista);
 
     if (!query.exec(string_query)) {
         qWarning() << "Error al ejecutar la consulta: " << query.lastError().text();
@@ -173,6 +139,7 @@ void Cancion::leerNotasDesdeBaseDeDatos(const QString& titulo, const QString& au
     if (query.next()) {
         QString contenidoJson = query.value(0).toString();
         QJsonDocument doc = QJsonDocument::fromJson(contenidoJson.toUtf8());
+        bpm = query.value(1).toInt();
 
         if (!doc.isObject()) {
             qWarning("El contenido JSON no es un objeto.");
@@ -489,7 +456,7 @@ void Cancion::reiniciarCancion() {
 
         // Programar las notas
         //leerNotasDesdeJson(nombreCancion + ".json");
-        leerNotasDesdeBaseDeDatos(nombreCancion, nombreArtista);
+        leerNotasDesdeBaseDeDatos();
     });
 }
 

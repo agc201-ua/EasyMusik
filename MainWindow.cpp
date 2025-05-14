@@ -4,10 +4,9 @@
 #include <QScreen>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), cancionActual(nullptr) {
-    // Configurar la ventana principal
     setWindowTitle("EasyMusik");
 
-    // Se crea la escena
+    // Se crea y se configura la escena
     scene = new QGraphicsScene(this);
     scene->setBackgroundBrush(QColor("#212121"));
 
@@ -35,9 +34,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), cancionActual(nul
     stackedWidget->setCurrentWidget(menuPrincipal);
 }
 
-MainWindow::~MainWindow() {
-    // El QStackedWidget se encarga de eliminar sus widgets hijos
-}
+MainWindow::~MainWindow() {}
 
 // Cerrar la aplicación
 void MainWindow::cerrarAplicacion() {
@@ -46,12 +43,12 @@ void MainWindow::cerrarAplicacion() {
 }
 
 // Slot para mostrar la pantalla de reproducción de canción
-void MainWindow::mostrarCancion(const QString &titulo, const QString &artista, const QString &jsonPath) {
+void MainWindow::mostrarCancion(const QString &titulo, const QString &artista) {
 
-    // Crear la pantalla de la canción
-    cancionActual = new Cancion(this, titulo, artista, jsonPath);
+    // Se crea la pantalla de la canción
+    cancionActual = new Cancion(this, titulo, artista);
 
-    // Conectar la señal para volver al menú
+    // Se conecta la señal para volver al menú
     connect(cancionActual, &Cancion::volver, this, &MainWindow::volverAlMenu);
 
     // Agregar al widget apilado y mostrar
@@ -66,8 +63,8 @@ void MainWindow::volverAlMenu() {
 
     // Si hay una canción activa, cambiar a menú y eliminar la canción
     if (cancionActual) {
-        stackedWidget->setCurrentWidget(menuPrincipal);
         stackedWidget->removeWidget(cancionActual);
+        stackedWidget->setCurrentWidget(menuPrincipal);
         delete cancionActual;
         cancionActual = nullptr;
     }

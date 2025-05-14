@@ -7,7 +7,7 @@
 
 // Constructor del widget de canción individual
 CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget *parent)
-    : QWidget(parent), m_titulo(titulo), m_artista(artista) {
+    : QWidget(parent), tituloCancion(titulo), artistaCancion(artista) {
 
     // Configuración del widget
     setMinimumHeight(120);
@@ -47,7 +47,7 @@ CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget 
     playButton = new QPushButton(this);
     playButton->setFixedSize(50, 50);
     playButton->setCursor(Qt::PointingHandCursor);
-    playButton->setIcon(QIcon(":/recursos/play.png")); // Asegúrate de tener este recurso
+    playButton->setIcon(QIcon(":/recursos/play.png")); // Icono de play
     playButton->setIconSize(QSize(30, 30));
     playButton->setStyleSheet(
         "QPushButton {"
@@ -81,7 +81,7 @@ CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget 
 
     // Conectar evento del botón de reproducción
     connect(playButton, &QPushButton::clicked, [this]() {
-        emit playCancion(m_titulo, m_artista);
+        emit playCancion(tituloCancion, artistaCancion);
     });
 }
 
@@ -184,32 +184,18 @@ bool MenuPrincipal::conectarBaseDeDatos() {
     QDir dir(rutaBase);
     dir.cdUp(); // Sube un nivel a build
     dir.cdUp(); // Sube un nivel a EasyMusik
-
     QString rutaDB = dir.filePath("canciones.db");
+
+    // Configurar el nombre de la base de datos
     db.setDatabaseName(rutaDB);
 
-    // Si la base de datos no existe, la creamos
-    if (!QFile::exists(rutaDB)) {
-        if (!db.open()) {
-            return false;
-        }
-
-        // Crear tabla de canciones
-        QSqlQuery query;
-        if (!query.exec("CREATE TABLE IF NOT EXISTS Partituras ("
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                        "titulo TEXT NOT NULL, "
-                        "autor TEXT NOT NULL, "
-                        "contenido TEXT NOT NULL, "
-                        "rutaArchivo TEXT)")) {
-            db.close();
-            return false;
-        }
-
+    // Intentar abrir la base de datos
+    if (!db.open()) {
+        return false;
+    }
+    else {
         return true;
     }
-
-    return db.open();
 }
 
 void MenuPrincipal::cargarCancionesDesdeBD() {
@@ -223,11 +209,12 @@ void MenuPrincipal::cargarCancionesDesdeBD() {
     }
 
     // Consultar canciones en la base de datos
-    QSqlQuery query("SELECT titulo, autor FROM Partituras ORDER BY titulo");
+    QSqlQuery query("SELECT titulo, autor, bpm FROM Partituras ORDER BY titulo");
 
     while (query.next()) {
         QString titulo = query.value(0).toString();
         QString artista = query.value(1).toString();
+        qreal bpm = query.value(2).toInt();
 
         // Crear widget de canción
         CancionItem *cancionItem = new CancionItem(titulo, artista, contenedorCanciones);
@@ -240,7 +227,7 @@ void MenuPrincipal::cargarCancionesDesdeBD() {
         cancionesLayout->addWidget(cancionItem);
     }
 
-    // Añadir espacio al final
+    // Añadir espacio al final para que se vea bonico
     cancionesLayout->addStretch();
 }
 
@@ -265,19 +252,26 @@ void MenuPrincipal::agregarNuevaCancion() {
     QString contenido = archivo.readAll();
     archivo.close();
 
-    // Extraer nombre y artista (asumiendo que el usuario los proporciona)
+    // Extraer nombre, artista y bpm (asumiendo que el usuario los proporciona)
     QString titulo = QInputDialog::getText(this, "Nueva Canción", "Título de la canción:");
-    if (titulo.isEmpty()) return;
+    if (titulo.isEmpty()) titulo = "Desconocido";
 
     QString artista = QInputDialog::getText(this, "Nueva Canción", "Artista:");
     if (artista.isEmpty()) artista = "Desconocido";
 
+    QString ritmo = QInputDialog::getText(this, "Nueva Canción", "Bpm:");
+    int bpm;
+    bool correctBpm;
+    bpm = ritmo.toInt(&correctBpm);
+    if (!correctBpm) bpm = 100;
+
     // Guardar en la base de datos
     QSqlQuery query;
-    query.prepare("INSERT INTO Partituras (titulo, autor, contenido) "
-                  "VALUES (:titulo, :autor, :contenido)");
+    query.prepare("INSERT INTO Partituras (titulo, autor, bpm, contenido) "
+                  "VALUES (:titulo, :autor, :bpm, :contenido)");
     query.bindValue(":titulo", titulo);
     query.bindValue(":autor", artista);
+    query.bindValue(":bpm", bpm);
     query.bindValue(":contenido", QString(contenido));
 
     if (!query.exec()) {
@@ -288,41 +282,11 @@ void MenuPrincipal::agregarNuevaCancion() {
     // Actualizar lista de canciones
     cargarCancionesDesdeBD();
 
+    // Mostrar un mensaje de que la canción ha sido guardada correctamente
     QMessageBox::information(this, "Éxito", "La canción se ha añadido correctamente.");
 }
 
+// Emitir señal con la canción seleccionada
 void MenuPrincipal::onPlayCancion(const QString &titulo, const QString &artista) {
-    // Obtener la ruta del archivo JSON
-    QString jsonPath = obtenerRutaArchivo(titulo, artista);
-
-    // Emitir señal con la canción seleccionada
-    emit playCancion(titulo, artista, jsonPath);
-}
-
-QString MenuPrincipal::obtenerRutaArchivo(const QString &titulo, const QString &artista) {
-    QSqlQuery query;
-    query.prepare("SELECT rutaArchivo, contenido FROM Partituras WHERE titulo = :titulo AND autor = :autor");
-    query.bindValue(":titulo", titulo);
-    query.bindValue(":autor", artista);
-
-    if (query.exec() && query.next()) {
-        // Verificar primero la ruta del archivo
-        QString rutaArchivo = query.value(0).toString();
-        if (!rutaArchivo.isEmpty() && QFile::exists(rutaArchivo)) {
-            return rutaArchivo;
-        }
-
-        // Si no existe, crear un archivo temporal con el contenido
-        QString contenido = query.value(1).toString();
-        QString tempPath = QDir::tempPath() + "/" + titulo + ".json";
-        QFile file(tempPath);
-
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            file.write(contenido.toUtf8());
-            file.close();
-            return tempPath;
-        }
-    }
-
-    return QString();
+    emit playCancion(titulo, artista);
 }
