@@ -9,24 +9,21 @@
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
-    //void volverAlMenu();
+private:
+    QStackedWidget *stackedWidget;
+    MenuPrincipal *menuPrincipal;
+    Cancion *cancionActual;
+    QGraphicsScene* scene;
+    QGraphicsView* view;
 
 private slots:
     void mostrarCancion(const QString &titulo, const QString &artista);
     void volverAlMenu();
     void cerrarAplicacion();
 
-private:
-    QStackedWidget *stackedWidget;
-    MenuPrincipal *menuPrincipal;
-    Cancion *cancionActual;
-
-    // Elementos de la interfaz
-    QGraphicsScene* scene;
-    QGraphicsView* view;
+public:
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
 };
 
-#endif // MAINWINDOW_H
+#endif

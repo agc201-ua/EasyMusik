@@ -52,17 +52,17 @@ CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget 
     playButton->setIconSize(QSize(30, 30));
     playButton->setStyleSheet(
         "QPushButton {"
-        "    background-color: #4CAF50;"
+        "    background-color: cyan;"
         "    border-radius: 25px;"
         "    border: none;"
         "}"
         "QPushButton:hover {"
-        "    background-color: #45a049;"
+        "    background-color: darkCyan;"
         "}"
         "QPushButton:pressed {"
-        "    background-color: #398e3d;"
+        "    background-color: darkCyan;"
         "}"
-        );
+    );
 
     // Añadir widgets al layout principal
     layout->addWidget(infoContainer, 1); // Con stretch para que ocupe el espacio disponible
@@ -152,17 +152,17 @@ void MenuPrincipal::inicializarUI() {
     btnAgregar->setCursor(Qt::PointingHandCursor);
     btnAgregar->setStyleSheet(
         "QPushButton {"
-        "    background-color: #4CAF50;"
+        "    background-color: cyan;"
         "    color: white;"
         "    border-radius: 30px;"
         "}"
         "QPushButton:hover {"
-        "    background-color: #45a049;"
+        "    background-color: darkCyan;"
         "}"
         "QPushButton:pressed {"
-        "    background-color: #398e3d;"
+        "    background-color: darkCyan;"
         "}"
-        );
+    );
 
     // Layout para centrar el botón
     QHBoxLayout *btnLayout = new QHBoxLayout();

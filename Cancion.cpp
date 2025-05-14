@@ -1,4 +1,5 @@
 #include "Cancion.h"
+#include "PausaDialog.h"
 #include <QSoundEffect>
 #include <QFileInfo>
 #include <QDir>
@@ -557,7 +558,6 @@ void Cancion::reiniciarCancion() {
         cancionEnPausa = false;
 
         // Programar las notas
-        //leerNotasDesdeJson(nombreCancion + ".json");
         leerNotasDesdeBaseDeDatos();
     });
 }

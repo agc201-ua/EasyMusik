@@ -2,7 +2,6 @@
 #define CANCION_H
 
 #include "Teclado.h"
-#include "PausaDialog.h"
 
 #include <QMainWindow>
 #include <QGraphicsScene>

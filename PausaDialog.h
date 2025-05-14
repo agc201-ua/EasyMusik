@@ -4,7 +4,7 @@
 #include <QDialog>
 
 namespace Ui {
-class PausaDialog;
+    class PausaDialog;
 }
 
 class PausaDialog : public QDialog
@@ -24,4 +24,4 @@ private:
     Ui::PausaDialog *ui;
 };
 
-#endif // PAUSADIALOG_H
+#endif

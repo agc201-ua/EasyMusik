@@ -64,4 +64,4 @@ public:
     ~MenuPrincipal();
 };
 
-#endif // MENUPRINCIPAL_H
+#endif
