@@ -363,7 +363,8 @@ void MenuPrincipal::agregarNuevaCancion() {
     QString artista = QInputDialog::getText(this, "Nueva Canción", "Artista:");
     if (artista.isEmpty()) artista = "Desconocido";
 
-    QString ritmo = QInputDialog::getText(this, "Nueva Canción", "Bpm:");
+    QString mensaje = "Bpm (velocidad de reproducción de la canción):";
+    QString ritmo = QInputDialog::getText(this, "Nueva Canción", mensaje);
     int bpm;
     bool correctBpm;
     bpm = ritmo.toInt(&correctBpm);
