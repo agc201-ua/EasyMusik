@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>284</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,14 +16,14 @@
   <widget class="QWidget" name="gridLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>50</y>
+     <x>90</x>
+     <y>60</y>
      <width>221</width>
      <height>151</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="2" column="0">
+    <item row="3" column="0">
      <widget class="QPushButton" name="btnSalir">
       <property name="text">
        <string>SALIR</string>
@@ -34,6 +34,13 @@
      <widget class="QPushButton" name="btnReiniciar">
       <property name="text">
        <string>REINICIAR CANCIÓN</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QPushButton" name="btnContinuar">
+      <property name="text">
+       <string>CONTINUAR</string>
       </property>
      </widget>
     </item>

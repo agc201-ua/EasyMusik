@@ -1,62 +1,29 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "Teclado.h"
-#include "PausaDialog.h"
-#include <QMainWindow> // Incluye la clase base de Qt para crear una ventana principal
-#include <QGraphicsScene>
-#include <QGraphicsView>
-#include <QFile>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QTimer>
-#include <QKeyEvent>
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QSqlError>
+#include <QMainWindow>
+#include <QStackedWidget>
+#include "MenuPrincipal.h"
+#include "Cancion.h"
 
+class MainWindow : public QMainWindow {
+    Q_OBJECT
 
-/*
-QT_BEGIN_NAMESPACE
-namespace Ui {
-    class MainWindow;  // Declaración anticipada de la clase 'MainWindow' que está en 'ui_mainwindow.h'
-}
-QT_END_NAMESPACE
-*/
+private:
+    QStackedWidget *stackedWidget;
+    MenuPrincipal *menuPrincipal;
+    Cancion *cancionActual;
+    QGraphicsScene* scene;
+    QGraphicsView* view;
 
-class MainWindow : public QMainWindow  // `MainWindow` hereda de `QMainWindow` de Qt
-{
-    Q_OBJECT  // Macro que habilita la funcionalidad de Qt Meta-Object System (para señales y slots)
+private slots:
+    void mostrarCancion(const QString &titulo, const QString &artista);
+    void volverAlMenu();
+    void cerrarAplicacion();
 
-    private:
-        QGraphicsScene* scene;
-        QGraphicsView* view;
-        Teclado* teclado;
-        int anchuraPantalla;
-        int alturaPantalla;
-        QString jsonActual; // Json que se esta leyendo actualmente
-        QList<QTimer*> timersNotas;  // Lista de timers para controlar las notas, para poder pausarlas y reiniciarlas.
-
-
-        // Ui::MainWindow *ui;  // Puntero a la interfaz de usuario (UI) generada por Qt Designer
-
-    public:
-        MainWindow(QWidget *parent = nullptr);
-        ~MainWindow();
-        void probar();
-        void crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion);
-        void leerNotasDesdeJson(const QString& ruta);
-        void leerNotasDesdeBaseDeDatos(const QString& titulo, const QString& autor);
-        void keyPressEvent(QKeyEvent* event);
-
-    private slots:
-        void mostrarMenuPausa();
-        void reiniciarCancion();
-        void cerrarAplicacion();
-        void mostrarCuentaAtras();
-
-
+public:
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
 };
 
 #endif

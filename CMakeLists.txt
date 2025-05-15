@@ -28,6 +28,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(EasyMusik
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        MenuPrincipal.h MenuPrincipal.cpp
+        Cancion.h Cancion.cpp
     )
 else()
     if(ANDROID)
