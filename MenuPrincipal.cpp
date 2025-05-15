@@ -6,23 +6,33 @@
 #include <QProcess>
 #include <QMouseEvent>
 
-// Constructor del widget de canción individual
+// Constructor del widget de la canción individual
 CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget *parent)
     : QWidget(parent), tituloCancion(titulo), artistaCancion(artista) {
-
-    // Configuración del widget
+    // Configuración del widget principal
     setMinimumHeight(120);
     setMinimumWidth(300);
-    setMaximumWidth(600);
-    setObjectName("cancionItem"); // Para estilo CSS
+    setObjectName("cancionItem");
 
-    // Crear layout principal horizontal
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->setContentsMargins(16, 12, 16, 12);
-    layout->setSpacing(10);
+    // Para que se expanda horizontalmente
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    // Contenedor para título y artista
-    QWidget *infoContainer = new QWidget(this);
+    // Crear un layout principal con márgenes
+    QHBoxLayout *mainLayout = new QHBoxLayout(this);
+    mainLayout->setContentsMargins(40, 10, 40, 10); // Establece márgenes (izq, arriba, der, abajo)
+
+    // Widget contenedor principal que tendrá el fondo blanco
+    QWidget *containerWidget = new QWidget();
+    containerWidget->setObjectName("contenedorBlanco");
+    containerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    // Layout horizontal para el contenedor principal
+    QHBoxLayout *containerLayout = new QHBoxLayout(containerWidget);
+    containerLayout->setContentsMargins(16, 12, 16, 12);
+    containerLayout->setSpacing(10);
+
+    // Widget para la información (título y artista)
+    QWidget *infoContainer = new QWidget();
     QVBoxLayout *infoLayout = new QVBoxLayout(infoContainer);
     infoLayout->setContentsMargins(0, 0, 0, 0);
     infoLayout->setSpacing(8);
@@ -40,45 +50,52 @@ CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget 
     artistaFont.setPointSize(12);
     artistaLabel->setFont(artistaFont);
 
-    // Añadir widgets al layout de info
+    // Añadir labels al layout de info
     infoLayout->addWidget(tituloLabel);
     infoLayout->addWidget(artistaLabel);
 
     // Botón de reproducción
-    playButton = new QPushButton(this);
+    playButton = new QPushButton();
     playButton->setFixedSize(50, 50);
     playButton->setCursor(Qt::PointingHandCursor);
-    playButton->setIcon(QIcon(":/recursos/play.png")); // Icono de play
+    playButton->setIcon(QIcon(":/recursos/playButton.png")); // Icono de play
     playButton->setIconSize(QSize(30, 30));
     playButton->setStyleSheet(
         "QPushButton {"
-        "    background-color: cyan;"
+        "    background-color: #e6e6e6;"
         "    border-radius: 25px;"
         "    border: none;"
+        "    padding-left: 5px;"
         "}"
         "QPushButton:hover {"
-        "    background-color: darkCyan;"
+        "    background-color: #cccccc;"
         "}"
         "QPushButton:pressed {"
-        "    background-color: darkCyan;"
+        "    background-color: #cccccc;"
         "}"
     );
 
-    // Añadir widgets al layout principal
-    layout->addWidget(infoContainer, 1); // Con stretch para que ocupe el espacio disponible
-    layout->addWidget(playButton);
+    // Añadir widgets al layout del contenedor
+    containerLayout->addWidget(infoContainer, 1); // Que ocupe el espacio disponible
+    containerLayout->addWidget(playButton);
 
-    // Estilo visual del contenedor
+    // Añadir el contenedor blanco al layout principal
+    mainLayout->addWidget(containerWidget);
+
+    // Estilo visual
     setStyleSheet(
         "QWidget#cancionItem {"
-        "    background-color: #303030;"
+        "    background-color: transparent;"
+        "}"
+        "QWidget#contenedorBlanco {"
+        "    background-color: white;"
+        "    border: 1px solid #CCCCCC;"
         "    border-radius: 10px;"
-        "    border: 1px solid #555555;"
         "}"
         "QLabel {"
-        "    color: white;"
+        "    color: black;"
         "}"
-        );
+    );
 
     // Conectar evento del botón de reproducción
     connect(playButton, &QPushButton::clicked, [this]() {
@@ -121,7 +138,10 @@ void MenuPrincipal::inicializarUI() {
     tituloFont.setBold(true);
     titulo->setFont(tituloFont);
     titulo->setAlignment(Qt::AlignCenter);
-    titulo->setStyleSheet("color: white; margin-bottom: 20px;");
+    titulo->setStyleSheet(
+        "color: white; "
+        "margin-bottom: 20px;"
+    );
     mainLayout->addWidget(titulo);
 
     // Área de desplazamiento para las canciones
@@ -129,7 +149,21 @@ void MenuPrincipal::inicializarUI() {
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setStyleSheet("background-color: transparent;");
+    scrollArea->setStyleSheet(
+        "QScrollArea {"
+        "    background-color: transparent;"
+        "}"
+        "QScrollBar:vertical {"
+        "    background-color: #353535;"
+        "    width: 10px;"
+        "}"
+        "QScrollBar::handle:vertical {"
+        "    background-color: white;"
+        "}"
+        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {"
+        "    height: 0px;"               // Ocultar botones de arriba/abajo
+        "}"
+    );
 
     // Contenedor para las canciones
     contenedorCanciones = new QWidget(scrollArea);
@@ -152,17 +186,18 @@ void MenuPrincipal::inicializarUI() {
     btnAgregar->setCursor(Qt::PointingHandCursor);
     btnAgregar->setStyleSheet(
         "QPushButton {"
-        "    background-color: cyan;"
-        "    color: white;"
+        "    background-color: white;"
+        "    color: black;"
         "    border-radius: 30px;"
-        "    qproperty-alignment: AlignCenter;"
         "    padding-bottom: 7px;"
         "}"
         "QPushButton:hover {"
-        "    background-color: darkCyan;"
+        "    background-color: #e6e6e6;"
+        "    color: #1e1e1e;"
         "}"
         "QPushButton:pressed {"
-        "    background-color: darkCyan;"
+        "    background-color: #e6e6e6;"
+        "    color: #1e1e1e;"
         "}"
     );
 
@@ -175,9 +210,6 @@ void MenuPrincipal::inicializarUI() {
 
     // Conectar señal del botón
     connect(btnAgregar, &QPushButton::clicked, this, &MenuPrincipal::agregarNuevaCancion);
-
-    // Estilo general
-    setStyleSheet("background-color: #212121;");
 }
 
 bool MenuPrincipal::conectarBaseDeDatos() {
