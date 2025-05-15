@@ -51,6 +51,7 @@ private:
     QWidget *contenedorCanciones;
     QVBoxLayout *cancionesLayout;
     QPushButton *btnAgregar;
+    QPushButton *btnSalir;
     QSqlDatabase db;
     // Métodos
     void inicializarUI();
@@ -58,6 +59,7 @@ private:
     bool conectarBaseDeDatos();
     void agregarNuevaCancion();
     void onPlayCancion(const QString &titulo, const QString &artista);
+    void cerrarAplicacion();
 
 public:
     MenuPrincipal(QWidget *parent = nullptr);

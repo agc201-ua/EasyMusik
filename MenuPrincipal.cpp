@@ -131,6 +131,9 @@ void MenuPrincipal::inicializarUI() {
     mainLayout->setContentsMargins(30, 30, 30, 30);
     mainLayout->setSpacing(20);
 
+    // Layout horizontal para título y botón de salida
+    QHBoxLayout *headerLayout = new QHBoxLayout();
+
     // Título del menú
     QLabel *titulo = new QLabel("EasyMusik", this);
     QFont tituloFont = titulo->font();
@@ -143,6 +146,42 @@ void MenuPrincipal::inicializarUI() {
         "margin-bottom: 20px;"
     );
     mainLayout->addWidget(titulo);
+
+    // Boton para salir de la app
+    btnSalir = new QPushButton("x", this);
+    btnSalir->setMinimumSize(30, 30);
+    btnSalir->setMaximumSize(30, 30);
+    QFont btnSalirFont("Arial", 20);
+    btnSalirFont.setPointSize(24);
+    btnSalirFont.setBold(true);
+    btnSalir->setFont(btnSalirFont);
+    btnSalir->setCursor(Qt::PointingHandCursor);
+    btnSalir->setStyleSheet(
+        "QPushButton {"
+        "    background-color: white;"
+        "    color: black;"
+        "    border-radius: 30px;"
+        "    padding-bottom: 7px;"
+        "}"
+        "QPushButton:hover {"
+        "    background-color: #e6e6e6;"
+        "    color: #1e1e1e;"
+        "}"
+        "QPushButton:pressed {"
+        "    background-color: #e6e6e6;"
+        "    color: #1e1e1e;"
+        "}"
+    );
+
+    // Conectar señal del botón
+    connect(btnSalir, &QPushButton::clicked, this, &MenuPrincipal::cerrarAplicacion);
+
+    // Añadir el título y el botón al layout horizontal
+    headerLayout->addWidget(titulo, 1); // El 1 da peso al título para que ocupe espacio
+    headerLayout->addWidget(btnSalir, 0, Qt::AlignRight | Qt::AlignTop); // Alinea el botón a la derecha
+
+    // Añadir el layout horizontal al layout principal
+    mainLayout->addLayout(headerLayout);
 
     // Área de desplazamiento para las canciones
     scrollArea = new QScrollArea(this);
@@ -354,4 +393,10 @@ void MenuPrincipal::agregarNuevaCancion() {
 // Emitir señal con la canción seleccionada
 void MenuPrincipal::onPlayCancion(const QString &titulo, const QString &artista) {
     emit playCancion(titulo, artista);
+}
+
+// Cerrar la aplicación
+void MenuPrincipal::cerrarAplicacion() {
+    qDebug() << "Saliendo de la app...";
+    QCoreApplication::quit();
 }
