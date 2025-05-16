@@ -22,6 +22,7 @@ set(PROJECT_SOURCES
         Teclado.h Teclado.cpp
         recursos.qrc
         PausaDialog.h PausaDialog.cpp PausaDialog.ui
+        FinDialog.h FinDialog.cpp FinDialog.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -30,6 +31,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         MenuPrincipal.h MenuPrincipal.cpp
         Cancion.h Cancion.cpp
+
+
+
     )
 else()
     if(ANDROID)
