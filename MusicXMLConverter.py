@@ -6,11 +6,11 @@ import sqlite3
 
 class MusicXMLConverter:
     ## Variables estáticas de los directorios
-    direccion_json = "./"
+    direccion_json = "./partituras"
 
 
     ## Constructor que recibe el nombre del archivo PDF, el nombre de la partitura y el nombre del autor.
-    def __init__(self, archivo_pdf, nombre_partitura, nombre_autor):
+    def __init__(self, archivo_pdf, nombre_partitura, nombre_autor, bpm):
         self.archivo_pdf = archivo_pdf
         self.archivo_base = os.path.splitext(os.path.basename(archivo_pdf))[0]
         self.archivo_json = self.direccion_json + self.archivo_base + ".json"
@@ -18,6 +18,7 @@ class MusicXMLConverter:
         self.archivo_txt = self.direccion_json + self.archivo_base + ".txt"
         self.nombre_partitura = nombre_partitura
         self.nombre_autor = nombre_autor
+        self.bpm = bpm
     
 
     ## Método para comprobar si el archivo PDF es válido (es un PDF).
@@ -48,9 +49,24 @@ class MusicXMLConverter:
         # Se pone la ruta de el .bat de Audiveris.
         # Se puede poner una ruta de destino si se le agrega el argumento -output y despues la ruta de destino (como se eliminan los ficheros temporales no lo he puesto).
         comando = [
-            ".\\Audiveris\\bin\\Audiveris.bat",
+            ".\\Audiveris\\Audiveris.exe",
             "-batch",
             "-export",
+            "-option", "org.audiveris.omr.sheet.BookManager.useSeparateBookFolders=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withText=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withLyrics=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withDynamics=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withArticulations=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withPedals=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withTitles=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withComposers=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withArrangers=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withTranscribers=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withRights=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withLyricTranslation=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withLyricsTranscription=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withLyricsSyllabification=false",
+            "-option", "org.audiveris.omr.run.ProcessingSwitches.withLyricsHyphenation=false",
             self.archivo_pdf
         ]
 
@@ -69,11 +85,11 @@ class MusicXMLConverter:
     ## Método para convertir un archivo MusicXML a JSON.
     ## Se utiliza la libreria music21 para leer el archivo MusicXML, convertirlo y guardarlo.
     ## Si se utiliza el argumento guardar_txt=True, se guardará también los archivos .json y .txt con los datos de la partitura.
-    def musicxml_a_json(self, guardar_txt=False):
+    def musicxml_a_json(self, guardar_txt=True):
         print("Convirtiendo el archivo MusicXML (", self.archivo_mxl, ") a texto.")
 
         partitura = converter.parse(self.archivo_mxl)
-  
+
         notas = []
 
         # Se recorren las notas de la partitura una a una (si es un acorde se considera un solo conjunto de notas).
@@ -118,7 +134,7 @@ class MusicXMLConverter:
             print(f"La canción '{self.nombre_partitura}' de '{self.nombre_autor}' ya existe en la base de datos.")
         else:
             # Insertar la nueva cancion.
-            cursor.execute("INSERT INTO Partituras (titulo, autor, contenido) VALUES (?, ?, ?)", (self.nombre_partitura, self.nombre_autor, datos_txt))
+            cursor.execute("INSERT INTO Partituras (titulo, autor, bpm, contenido) VALUES (?, ?, ?, ?)", (self.nombre_partitura, self.nombre_autor, self.bpm, datos_txt))
             
             # Guardar los cambios.
             conexion.commit()
