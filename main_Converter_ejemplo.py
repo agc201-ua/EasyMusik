@@ -5,14 +5,15 @@ from MusicXMLConverter import MusicXMLConverter
 ## Ejemplo de uso de la clase y sus métodos.
 if __name__ == "__main__":
     # Verificar si se han pasado los argumentos necesarios.
-    if len(sys.argv) != 4:
-        print("Uso: python main_converter_ejemplo.py <nombre_del_fichero_pdf> <nombre_partitura> <nombre_autor>")
+    if len(sys.argv) != 5:
+        print("Uso: python main_converter_ejemplo.py <nombre_del_fichero_pdf> <nombre_partitura> <nombre_autor> <bpm>")
         sys.exit(1)
 
     ## Se guardan los argumentos en variables para usarlos en la clase.
     archivo_pdf = sys.argv[1]
     nombre_partitura = sys.argv[2]
     nombre_autor = sys.argv[3]
+    bpm = sys.argv[4]
 
     # Conectar a la base de datos SQLite (canciones.db).
     conexion = sqlite3.connect("canciones.db")
@@ -26,7 +27,7 @@ if __name__ == "__main__":
         print(f"La canción '{nombre_partitura}' de '{nombre_autor}' ya existe en la base de datos.")
     else:
         # Crear una instancia de MusicXMLConverter.
-        convertermxl = MusicXMLConverter(archivo_pdf, nombre_partitura, nombre_autor)
+        convertermxl = MusicXMLConverter(archivo_pdf, nombre_partitura, nombre_autor, bpm)
 
         try:
             # Comprobar si el archivo es un PDF.
@@ -35,7 +36,7 @@ if __name__ == "__main__":
                 convertermxl.convertir_pdf_a_musicxml()
 
                 # Unir partituras y convertir a JSON.
-                convertermxl.musicxml_a_json(guardar_txt=False)
+                convertermxl.musicxml_a_json(guardar_txt=True)
 
         except Exception as e:
             print("Error en la conversión:", e.args)

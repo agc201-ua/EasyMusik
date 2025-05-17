@@ -6,11 +6,11 @@ import sqlite3
 
 class MusicXMLConverter:
     ## Variables estáticas de los directorios
-    direccion_json = "./"
+    direccion_json = "./partituras"
 
 
     ## Constructor que recibe el nombre del archivo PDF, el nombre de la partitura y el nombre del autor.
-    def __init__(self, archivo_pdf, nombre_partitura, nombre_autor):
+    def __init__(self, archivo_pdf, nombre_partitura, nombre_autor, bpm):
         self.archivo_pdf = archivo_pdf
         self.archivo_base = os.path.splitext(os.path.basename(archivo_pdf))[0]
         self.archivo_json = self.direccion_json + self.archivo_base + ".json"
@@ -18,6 +18,7 @@ class MusicXMLConverter:
         self.archivo_txt = self.direccion_json + self.archivo_base + ".txt"
         self.nombre_partitura = nombre_partitura
         self.nombre_autor = nombre_autor
+        self.bpm = bpm
     
 
     ## Método para comprobar si el archivo PDF es válido (es un PDF).
@@ -133,7 +134,7 @@ class MusicXMLConverter:
             print(f"La canción '{self.nombre_partitura}' de '{self.nombre_autor}' ya existe en la base de datos.")
         else:
             # Insertar la nueva cancion.
-            cursor.execute("INSERT INTO Partituras (titulo, autor, contenido) VALUES (?, ?, ?)", (self.nombre_partitura, self.nombre_autor, datos_txt))
+            cursor.execute("INSERT INTO Partituras (titulo, autor, bpm, contenido) VALUES (?, ?, ?, ?)", (self.nombre_partitura, self.nombre_autor, self.bpm, datos_txt))
             
             # Guardar los cambios.
             conexion.commit()

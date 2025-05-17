@@ -22,9 +22,12 @@ java/io/File$PathStatus
 java/io/FileCleanable
 java/io/FileDescriptor
 java/io/FileDescriptor$1
+java/io/FileDescriptor$Resource
 java/io/FileInputStream
 java/io/FileInputStream$1
+java/io/FileInputStream$2
 java/io/FileOutputStream
+java/io/FileOutputStream$2
 java/io/FilePermission
 java/io/FileSystem
 java/io/FilterInputStream
@@ -39,6 +42,7 @@ java/io/PrintStream$1
 java/io/RandomAccessFile
 java/io/RandomAccessFile$1
 java/io/RandomAccessFile$2
+java/io/RandomAccessFile$3
 java/io/Serializable
 java/io/WinNTFileSystem
 java/io/Writer
@@ -358,6 +362,7 @@ java/net/Inet6Address$Inet6AddressHolder
 java/net/Inet6AddressImpl
 java/net/InetAddress
 java/net/InetAddress$1
+java/net/InetAddress$2
 java/net/InetAddress$InetAddressHolder
 java/net/InetAddress$PlatformResolver
 java/net/InetAddressImpl
@@ -941,6 +946,21 @@ jdk/internal/access/JavaUtilJarAccess
 jdk/internal/access/JavaUtilResourceBundleAccess
 jdk/internal/access/JavaUtilZipFileAccess
 jdk/internal/access/SharedSecrets
+jdk/internal/crac/Core$Priority
+jdk/internal/crac/JDKFdResource
+jdk/internal/crac/JDKFdResource$1
+jdk/internal/crac/JDKFileResource
+jdk/internal/crac/JDKResource
+jdk/internal/crac/OpenResourcePolicies
+jdk/internal/crac/OpenResourcePolicies$1
+jdk/internal/crac/OpenResourcePolicies$State
+jdk/internal/crac/mirror/Context
+jdk/internal/crac/mirror/Core
+jdk/internal/crac/mirror/Resource
+jdk/internal/crac/mirror/impl/AbstractContext
+jdk/internal/crac/mirror/impl/BlockingOrderedContext
+jdk/internal/crac/mirror/impl/GlobalContext
+jdk/internal/crac/mirror/impl/OrderedContext
 jdk/internal/foreign/abi/ABIDescriptor
 jdk/internal/foreign/abi/NativeEntryPoint
 jdk/internal/foreign/abi/UpcallLinker$CallRegs
@@ -948,7 +968,6 @@ jdk/internal/foreign/abi/VMStorage
 jdk/internal/jimage/BasicImageReader
 jdk/internal/jimage/BasicImageReader$1
 jdk/internal/jimage/ImageHeader
-jdk/internal/jimage/ImageLocation
 jdk/internal/jimage/ImageReader
 jdk/internal/jimage/ImageReader$SharedImageReader
 jdk/internal/jimage/ImageReaderFactory
@@ -1125,6 +1144,7 @@ jdk/internal/util/StrongReferenceKey
 jdk/internal/util/SystemProps
 jdk/internal/util/SystemProps$Raw
 jdk/internal/util/WeakReferenceKey
+jdk/internal/util/jar/PersistentJarFile
 jdk/internal/util/random/RandomSupport
 jdk/internal/vm/Continuation
 jdk/internal/vm/ContinuationScope
