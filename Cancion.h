@@ -77,6 +77,7 @@ private:
     // Métodos para la interfaz
     void inicializarUI();
     void mostrarMenuPausa();
+    void mostrarMenuFin();
     void mostrarCuentaAtras(std::function<void()> callbackAlTerminar = nullptr);
 
     // Gestor de eventos

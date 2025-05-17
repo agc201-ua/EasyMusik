@@ -1,5 +1,6 @@
 #include "Cancion.h"
 #include "PausaDialog.h"
+#include "FinDialog.h"
 #include <QSoundEffect>
 #include <QFileInfo>
 #include <QDir>
@@ -504,6 +505,21 @@ void Cancion::mostrarMenuPausa() {
     view->setGraphicsEffect(nullptr);
 
 }
+
+void Cancion::mostrarMenuFin() {
+    FinDialog dialog(this);
+    QGraphicsBlurEffect* blur = new QGraphicsBlurEffect;
+    blur->setBlurRadius(8);
+    view->setGraphicsEffect(blur);
+
+    connect(&dialog, &FinDialog::reiniciarClicked, this, &Cancion::reiniciarCancion);
+    connect(&dialog, &FinDialog::salirClicked, this, &Cancion::finalizarCancion);
+
+    dialog.exec();
+
+    view->setGraphicsEffect(nullptr);
+}
+
 
 // Reiniciar la canción
 void Cancion::reiniciarCancion() {
