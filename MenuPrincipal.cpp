@@ -336,58 +336,84 @@ void MenuPrincipal::cargarCancionesDesdeBD() {
 }
 
 void MenuPrincipal::agregarNuevaCancion() {
-    // Seleccionar archivo JSON
-    QString rutaArchivo = QFileDialog::getOpenFileName(this,
-                                                       "Seleccionar Archivo de Canción",
-                                                       "",
-                                                       "Archivos JSON (*.json)");
+    // Seleccionar archivo PDF
+    QString rutaPDF = QFileDialog::getOpenFileName(this,
+                                                   "Seleccionar Archivo de Partitura (PDF)",
+                                                   "",
+                                                   "Archivos PDF (*.pdf)");
 
-    if (rutaArchivo.isEmpty()) {
+    if (rutaPDF.isEmpty()) {
         return;
     }
 
-    // Leer archivo JSON
-    QFile archivo(rutaArchivo);
-    if (!archivo.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::warning(this, "Error", "No se pudo abrir el archivo seleccionado.");
-        return;
-    }
-
-    QString contenido = archivo.readAll();
-    archivo.close();
-
-    // Extraer nombre, artista y bpm (asumiendo que el usuario los proporciona)
+    // Pedir datos al usuario
     QString titulo = QInputDialog::getText(this, "Nueva Canción", "Título de la canción:");
     if (titulo.isEmpty()) titulo = "Desconocido";
 
     QString artista = QInputDialog::getText(this, "Nueva Canción", "Artista:");
     if (artista.isEmpty()) artista = "Desconocido";
 
-    QString ritmo = QInputDialog::getText(this, "Nueva Canción", "Bpm:");
+    QString ritmo = QInputDialog::getText(this, "Nueva Canción", "BPM:");
     int bpm;
-    bool correctBpm;
-    bpm = ritmo.toInt(&correctBpm);
-    if (!correctBpm) bpm = 100;
+    bool bpmOk;
+    bpm = ritmo.toInt(&bpmOk);
+    if (!bpmOk) bpm = 100;
 
-    // Guardar en la base de datos
-    QSqlQuery query;
-    query.prepare("INSERT INTO Partituras (titulo, autor, bpm, contenido) "
-                  "VALUES (:titulo, :autor, :bpm, :contenido)");
-    query.bindValue(":titulo", titulo);
-    query.bindValue(":autor", artista);
-    query.bindValue(":bpm", bpm);
-    query.bindValue(":contenido", QString(contenido));
+    // Ejecutar el script Python
+    QProcess proceso;
+    QString programa = "python";
+    QStringList argumentos;
 
-    if (!query.exec()) {
-        QMessageBox::warning(this, "Error", "No se pudo guardar la canción en la base de datos.");
+    QString rutaBase = QCoreApplication::applicationDirPath();
+    QDir dir(rutaBase);
+    dir.cdUp(); // Sube un nivel a build
+    dir.cdUp(); // Sube un nivel a EasyMusik
+    QString rutaScript = dir.filePath("main_converter_ejemplo.py");
+
+    argumentos << rutaScript
+               << rutaPDF
+               << titulo
+               << artista
+               << QString::number(bpm);
+
+    qDebug() << "Programa:" << programa;
+    qDebug() << "Ruta del script:" << rutaScript;
+    qDebug() << "Argumentos:";
+    for (const QString &arg : argumentos) {
+        qDebug() << "  " << arg;
+    }
+
+    proceso.setWorkingDirectory(dir.absolutePath());
+    proceso.start(programa, argumentos);
+    if (!proceso.waitForStarted()) {
+        QMessageBox::warning(this, "Error", "No se pudo iniciar el script de conversión.");
+        return;
+    }
+
+    bool ok = proceso.waitForFinished(180000); // Espera hasta 60 segundos
+    if (!ok) {
+        QMessageBox::warning(this, "Timeout", "El script tardó demasiado y fue abortado.");
+        return;
+    }    QString salida = proceso.readAllStandardOutput();
+    QString errores = proceso.readAllStandardError();
+
+    qDebug() << "Salida estándar:";
+    qDebug() << salida;
+    qDebug() << "Errores estándar:";
+    qDebug() << errores;
+
+    if (!errores.isEmpty()) {
+        QMessageBox::warning(this, "Error", "La conversión falló:\n" + errores);
         return;
     }
 
     // Actualizar lista de canciones
     cargarCancionesDesdeBD();
 
-    // Mostrar un mensaje de que la canción ha sido guardada correctamente
     QMessageBox::information(this, "Éxito", "La canción se ha añadido correctamente.");
+
+    int exitCode = proceso.exitCode();
+    qDebug() << "Exit code del proceso:" << exitCode;
 }
 
 // Emitir señal con la canción seleccionada
