@@ -4,7 +4,7 @@
 #include <QDialog>
 
 namespace Ui {
-class PausaDialog;
+    class PausaDialog;
 }
 
 class PausaDialog : public QDialog
@@ -18,9 +18,10 @@ public:
 signals:
     void reiniciarClicked();
     void salirClicked();
+    void continuarClicked();
 
 private:
     Ui::PausaDialog *ui;
 };
 
-#endif // PAUSADIALOG_H
+#endif

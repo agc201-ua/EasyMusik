@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>canciones.db</file>
+	<file>./recursos/playButton.png</file>
     </qresource>
 </RCC>

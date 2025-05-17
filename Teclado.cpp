@@ -197,26 +197,3 @@ Teclado::~Teclado() {
     teclas.clear();
 }
 
-/*qreal Teclado::obtenerXdeCodigo(QString codigo) {
-    QString nota = codigo.left(codigo.size() - 1);
-    int octava = codigo.right(1).toInt();
-
-    for (Tecla* t : teclas) {
-        if (t->getOctava() == octava && t->getNombres().contains(nota)) {
-            return t->getPosX();  // ⬅️ Este es el cambio
-        }
-    }
-    return -1; // No encontrado
-}
-
-QPair<qreal, bool> Teclado::obtenerDatosTecla(QString codigo) {
-    QString nota = codigo.left(codigo.size() - 1);
-    int octava = codigo.right(1).toInt();
-    for (Tecla* t : teclas) {
-        if (t->getOctava() == octava && t->getNombres().contains(nota)) {
-            return QPair<qreal, bool>(t->getPosX(), t->esNegra());
-        }
-    }
-    return QPair<qreal, bool>(-1, false); // No encontrado
-}*/
-

@@ -22,12 +22,20 @@ set(PROJECT_SOURCES
         Teclado.h Teclado.cpp
         recursos.qrc
         PausaDialog.h PausaDialog.cpp PausaDialog.ui
+        FinDialog.h FinDialog.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(EasyMusik
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        MenuPrincipal.h MenuPrincipal.cpp
+        Cancion.h Cancion.cpp
+        FinDialog.h FinDialog.cpp FinDialog.ui
+
+
+
+
     )
 else()
     if(ANDROID)
