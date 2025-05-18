@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
-	<file>./recursos/playButton.png</file>
+        <file>recursos/playButton.png</file>
+        <file>recursos/SpinnerCargaAudiveris.gif</file>
     </qresource>
 </RCC>

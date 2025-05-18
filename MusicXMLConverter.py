@@ -6,16 +6,16 @@ import sqlite3
 
 class MusicXMLConverter:
     ## Variables estáticas de los directorios
-    direccion_json = "./partituras"
-
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    direccion_json = os.path.join(script_dir, "partituras")
 
     ## Constructor que recibe el nombre del archivo PDF, el nombre de la partitura y el nombre del autor.
     def __init__(self, archivo_pdf, nombre_partitura, nombre_autor, bpm):
         self.archivo_pdf = archivo_pdf
         self.archivo_base = os.path.splitext(os.path.basename(archivo_pdf))[0]
-        self.archivo_json = self.direccion_json + self.archivo_base + ".json"
-        self.archivo_mxl = self.archivo_base + ".mxl"
-        self.archivo_txt = self.direccion_json + self.archivo_base + ".txt"
+        self.archivo_json = os.path.join(self.direccion_json, self.archivo_base + ".json")
+        self.archivo_mxl = os.path.join(self.direccion_json, self.archivo_base + ".mxl")
+        self.archivo_txt = os.path.join(self.direccion_json, self.archivo_base + ".txt")
         self.nombre_partitura = nombre_partitura
         self.nombre_autor = nombre_autor
         self.bpm = bpm
@@ -45,11 +45,13 @@ class MusicXMLConverter:
     def convertir_pdf_a_musicxml(self):
         print("Convirtiendo el archivo PDF (", self.archivo_pdf, ") a MusicXML utilizando Audiveris.")
 
+        audiveris_path = os.path.join(self.script_dir, "Audiveris", "Audiveris.exe")
+
         # Comando para ejecutar Audiveris
-        # Se pone la ruta de el .bat de Audiveris.
+        # Se pone la ruta de el .exe de Audiveris.
         # Se puede poner una ruta de destino si se le agrega el argumento -output y despues la ruta de destino (como se eliminan los ficheros temporales no lo he puesto).
         comando = [
-            ".\\Audiveris\\Audiveris.exe",
+            audiveris_path,
             "-batch",
             "-export",
             "-option", "org.audiveris.omr.sheet.BookManager.useSeparateBookFolders=false",
@@ -160,35 +162,39 @@ class MusicXMLConverter:
     ## Método para eliminar archivos temporales al acabar la transformacion.
     ## Se eliminan los archivos .omr, .log y .mxl que se generan al convertir el PDF a MusicXML.
     def eliminar_temporales(self):
-        print("Eliminando archivos temporales .omr.")
+        partituras_dir = os.path.join(self.script_dir, "partituras")
+        print(f"Eliminando archivos temporales .omr de {partituras_dir}")
 
         try:
-            for archivo in os.listdir("."):
+            for archivo in os.listdir(partituras_dir):
                 if archivo.endswith(".omr"):
-                    os.remove(os.path.join(".", archivo))
-                    print(f"Archivo eliminado: {archivo}\n")
+                    file_path = os.path.join(partituras_dir, archivo)
+                    os.remove(file_path)
+                    print(f"Archivo eliminado: {file_path}\n")
         except Exception as e:
             print("Error al eliminar archivos temporales:", e.args)
             traceback.print_exc()
 
-        print("Eliminando archivos temporales .log.")
+        print(f"Eliminando archivos temporales .log de {partituras_dir}")
 
         try:
-            for archivo in os.listdir("."):
+            for archivo in os.listdir(partituras_dir):
                 if archivo.endswith(".log"):
-                    os.remove(os.path.join(".", archivo))
-                    print(f"Archivo eliminado: {archivo}\n")
+                    file_path = os.path.join(partituras_dir, archivo)
+                    os.remove(file_path)
+                    print(f"Archivo eliminado: {file_path}\n")
         except Exception as e:
             print("Error al eliminar archivos temporales:", e.args)
             traceback.print_exc()
 
-        print("Eliminando archivos temporales .mxl.")
+        print(f"Eliminando archivos temporales .mxl de {partituras_dir}")
 
         try:
-            for archivo in os.listdir("."):
+            for archivo in os.listdir(partituras_dir):
                 if archivo.endswith(".mxl"):
-                    os.remove(os.path.join(".", archivo))
-                    print(f"Archivo eliminado: {archivo}\n")
+                    file_path = os.path.join(partituras_dir, archivo)
+                    os.remove(file_path)
+                    print(f"Archivo eliminado: {file_path}\n")
         except Exception as e:
             print("Error al eliminar archivos temporales:", e.args)
             traceback.print_exc()
@@ -196,7 +202,7 @@ class MusicXMLConverter:
         print("Eliminando carpeta __pycache__.")
 
         try:
-            pycache_path = os.path.join(".", "__pycache__")
+            pycache_path = os.path.join(self.script_dir, "__pycache__")
             if os.path.isdir(pycache_path):
                 for root, dirs, files in os.walk(pycache_path, topdown=False):
                     for file in files:

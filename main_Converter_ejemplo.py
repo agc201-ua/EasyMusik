@@ -15,32 +15,21 @@ if __name__ == "__main__":
     nombre_autor = sys.argv[3]
     bpm = sys.argv[4]
 
-    # Conectar a la base de datos SQLite (canciones.db).
-    conexion = sqlite3.connect("canciones.db")
-    cursor = conexion.cursor()
+    # Crear una instancia de MusicXMLConverter.
+    convertermxl = MusicXMLConverter(archivo_pdf, nombre_partitura, nombre_autor, bpm)
 
-    # Buscar la partitura en la base de datos.
-    cursor.execute("SELECT id FROM Partituras WHERE titulo = ? AND autor = ?", (nombre_partitura, nombre_autor))
-    resultado = cursor.fetchone()
+    try:
+        # Comprobar si el archivo es un PDF.
+        if convertermxl.comprobar_pdf():
+            # Ejecutar conversión de PDF a MusicXML.
+            convertermxl.convertir_pdf_a_musicxml()
 
-    if resultado:
-        print(f"La canción '{nombre_partitura}' de '{nombre_autor}' ya existe en la base de datos.")
-    else:
-        # Crear una instancia de MusicXMLConverter.
-        convertermxl = MusicXMLConverter(archivo_pdf, nombre_partitura, nombre_autor, bpm)
+            # Unir partituras y convertir a JSON.
+            convertermxl.musicxml_a_json(guardar_txt=True)
 
-        try:
-            # Comprobar si el archivo es un PDF.
-            if convertermxl.comprobar_pdf():
-                # Ejecutar conversión de PDF a MusicXML.
-                convertermxl.convertir_pdf_a_musicxml()
-
-                # Unir partituras y convertir a JSON.
-                convertermxl.musicxml_a_json(guardar_txt=True)
-
-        except Exception as e:
-            print("Error en la conversión:", e.args)
-            traceback.print_exc()
-        finally:
-            # Eliminar archivos temporales (omr, log, mxl) al finalizar.
-            convertermxl.eliminar_temporales()
+    except Exception as e:
+        print("Error en la conversión:", e.args)
+        traceback.print_exc()
+    finally:
+        # Eliminar archivos temporales (omr, log, mxl) al finalizar.
+        convertermxl.eliminar_temporales()
