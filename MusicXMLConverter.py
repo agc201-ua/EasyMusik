@@ -87,7 +87,7 @@ class MusicXMLConverter:
     ## Método para convertir un archivo MusicXML a JSON.
     ## Se utiliza la libreria music21 para leer el archivo MusicXML, convertirlo y guardarlo.
     ## Si se utiliza el argumento guardar_txt=True, se guardará también los archivos .json y .txt con los datos de la partitura.
-    def musicxml_a_json(self, guardar_txt=False):
+    def musicxml_a_json(self, guardar_txt=True):
         print("Convirtiendo el archivo MusicXML (", self.archivo_mxl, ") a texto.")
 
         partitura = converter.parse(self.archivo_mxl)
