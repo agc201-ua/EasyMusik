@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QProcess>
 #include <QMouseEvent>
+#include "VentanaCarga.h"
 
 // Constructor del widget de la canción individual
 CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget *parent)
@@ -360,7 +361,6 @@ void MenuPrincipal::agregarNuevaCancion() {
     if (!bpmOk) bpm = 100;
 
     // Ejecutar el script Python
-    QProcess proceso;
     QString programa = "python";
     QStringList argumentos;
 
@@ -383,37 +383,44 @@ void MenuPrincipal::agregarNuevaCancion() {
         qDebug() << "  " << arg;
     }
 
-    proceso.setWorkingDirectory(dir.absolutePath());
-    proceso.start(programa, argumentos);
-    if (!proceso.waitForStarted()) {
-        QMessageBox::warning(this, "Error", "No se pudo iniciar el script de conversión.");
-        return;
-    }
+    QProcess *proceso = new QProcess(this);
+    proceso->setWorkingDirectory(dir.absolutePath());
 
-    bool ok = proceso.waitForFinished(180000); // Espera hasta 60 segundos
-    if (!ok) {
-        QMessageBox::warning(this, "Timeout", "El script tardó demasiado y fue abortado.");
-        return;
-    }    QString salida = proceso.readAllStandardOutput();
-    QString errores = proceso.readAllStandardError();
+    VentanaCarga *ventanaCarga = new VentanaCarga(this);
+    ventanaCarga->show();
 
-    qDebug() << "Salida estándar:";
-    qDebug() << salida;
-    qDebug() << "Errores estándar:";
-    qDebug() << errores;
+    // Conectar señales
+    connect(proceso, &QProcess::finished, this, [=](int exitCode, QProcess::ExitStatus status) {
+        ventanaCarga->close();
+        ventanaCarga->deleteLater();
 
-    if (!errores.isEmpty()) {
-        QMessageBox::warning(this, "Error", "La conversión falló:\n" + errores);
-        return;
-    }
+        QString salida = proceso->readAllStandardOutput();
+        QString errores = proceso->readAllStandardError();
 
-    // Actualizar lista de canciones
-    cargarCancionesDesdeBD();
+        qDebug() << "Salida estándar:\n" << salida;
+        qDebug() << "Errores estándar:\n" << errores;
+        qDebug() << "Exit code:" << exitCode;
 
-    QMessageBox::information(this, "Éxito", "La canción se ha añadido correctamente.");
+        proceso->deleteLater();
 
-    int exitCode = proceso.exitCode();
-    qDebug() << "Exit code del proceso:" << exitCode;
+        if (status == QProcess::CrashExit || exitCode != 0 || !errores.isEmpty()) {
+            QMessageBox::warning(this, "Error", "La conversión falló:\n" + errores);
+            return;
+        }
+
+        cargarCancionesDesdeBD();
+        QMessageBox::information(this, "Éxito", "La canción se ha añadido correctamente.");
+    });
+
+    connect(proceso, &QProcess::errorOccurred, this, [=](QProcess::ProcessError error) {
+        ventanaCarga->close();
+        ventanaCarga->deleteLater();
+        proceso->deleteLater();
+        QMessageBox::critical(this, "Error", "No se pudo iniciar el proceso:\n" + proceso->errorString());
+    });
+
+    // Iniciar proceso
+    proceso->start(programa, argumentos);
 }
 
 // Emitir señal con la canción seleccionada

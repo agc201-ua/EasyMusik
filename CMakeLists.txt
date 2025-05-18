@@ -32,6 +32,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MenuPrincipal.h MenuPrincipal.cpp
         Cancion.h Cancion.cpp
         FinDialog.h FinDialog.cpp FinDialog.ui
+        VentanaCarga.h
+        VentanaCarga.cpp
 
 
 
