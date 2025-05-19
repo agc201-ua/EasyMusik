@@ -13,6 +13,19 @@ using namespace std;
  * "Offset": 30.0,
  * "Duración": 1.0
 */
+QString normalizarNombreNota(const QString& nombre) {
+    static QMap<QString, QString> mapa = {
+        {"C", "c"}, {"C+", "#c"}, {"D-", "#c"},
+        {"D", "d"}, {"D+", "#d"}, {"E-", "#d"},
+        {"E", "e"},
+        {"F", "f"}, {"F+", "#f"}, {"G-", "#f"},
+        {"G", "g"}, {"G+", "#g"}, {"A-", "#g"},
+        {"A", "a"}, {"A+", "#a"}, {"B-", "#a"},
+        {"B", "b"}
+    };
+    return mapa.value(nombre.toUpper(), nombre.toLower());
+}
+
 
 Tecla::Tecla(QVector<QString> names, int octave, bool illuminated) {
     nombres = names;
@@ -21,14 +34,16 @@ Tecla::Tecla(QVector<QString> names, int octave, bool illuminated) {
 
     // Obtener el audio
     // Construimos el nombre del archivo, por ejemplo "E-3.wav"
-    QString nombreArchivo = names.first() + QString::number(octave) + ".wav";
+    QString notaAudio = normalizarNombreNota(names.first());
+    QString nombreArchivo = notaAudio + QString::number(octave) + "vH.wav";
+
 
     // Ruta al recurso
     QDir dir(QDir::currentPath());   // Obtén el directorio actual
     dir.cdUp();
     dir.cdUp();
     rutaAudio = dir.absoluteFilePath("wav_sounds/" + nombreArchivo);  // Construye la ruta del archivo
-
+    rutaAudio = dir.absoluteFilePath("sounds/" + nombreArchivo);
     QFile file(rutaAudio);
     if (!file.exists()) {
         qDebug() << "El archivo de audio no existe en la ruta: " << rutaAudio;
