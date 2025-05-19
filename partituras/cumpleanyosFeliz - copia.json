@@ -1,0 +1,16 @@
+{
+    "Notas": [
+        {
+            "Nota": "C",
+            "Octava": 4,
+            "Offset": 0.0,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "C",
+            "Octava": 4,
+            "Offset": 0.5,
+            "Duracion": 0.5
+        }
+    ]
+}

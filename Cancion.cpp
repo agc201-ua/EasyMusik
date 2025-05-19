@@ -216,8 +216,12 @@ void Cancion::programarNotasCayendo() {
     }
     notasCayendo.clear();
 
+
+
     // Se programa cada nota cayendo a partir de las notas guardadas en el array del JSON
     for (int i = 0; i < notasJson.size(); i++) {
+
+
         QJsonObject datos = notasJson[i].toObject();
 
         NotaCayendo nota;
@@ -225,10 +229,12 @@ void Cancion::programarNotasCayendo() {
         nota.procesada = false;
         nota.timer = new QTimer(this);
         nota.timer->setSingleShot(true);
-
+        if(i==notasJson.size()-1)
+        {nota.esUltimaNota=true;}
+        else{nota.esUltimaNota=false;}
         // Conectar el timer para reproducir la nota cuando sea el momento
         connect(nota.timer, &QTimer::timeout, this, [this, i]() {
-            crearNotaCayendo(i);
+            crearNotaCayendo(i,notasCayendo[i].esUltimaNota);
             notasCayendo[i].procesada = true;
         });
 
@@ -240,7 +246,7 @@ void Cancion::programarNotasCayendo() {
 }
 
 // Crear una nota cayendo en específico
-void Cancion::crearNotaCayendo(int indice) {
+void Cancion::crearNotaCayendo(int indice,bool esUltima) {
     QJsonObject obj = notasJson[indice].toObject();
     QString nota = obj["Nota"].toString();
     int octava = obj["Octava"].toInt();
@@ -259,7 +265,7 @@ void Cancion::crearNotaCayendo(int indice) {
 
     // Se crear la animación de la nota cayendo
     QRectF rect = teclaReal->mapRectToScene(teclaReal->boundingRect());
-    crearNotaCayendo(rect.x(), -rect.height(), teclaReal, duracionNota);
+    crearNotaCayendo(rect.x(), -rect.height(), teclaReal, duracionNota, esUltima);
 
     // Se actualiza el índice de nota actual
     if (indice == indiceNotaActual) {
@@ -268,7 +274,7 @@ void Cancion::crearNotaCayendo(int indice) {
 }
 
 // Crea una nota visual que cae desde una posición concreta y colisiona con una tecla
-void Cancion::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion) {
+void Cancion::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion,bool esUltima) {
     // Se definen los pixeles que caerán por frame
     qreal pixelesPorDesplazamiento = 5;
     qreal intervaloEnMilisegundos = 30;
@@ -355,6 +361,12 @@ void Cancion::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qre
             teclaObjetivo->apagar();
             scene->removeItem(nota);
             delete nota;
+            if (esUltima) {
+                QTimer::singleShot(1000, this, [this]() {
+                    mostrarMenuFin();
+                });
+            }
+
         }
     });
 
@@ -382,7 +394,7 @@ void Cancion::actualizarTimersNotas() {
 
         // Si el tiempo ya pasó pero la nota no se procesó, entonces reproducirla inmediatamente
         if (tiempoRestante <= 0) {
-            crearNotaCayendo(i);
+            crearNotaCayendo(i,notasCayendo[i].esUltimaNota);
             nota.procesada = true;
         }
         // Si falta tiempo, programar el timer
@@ -408,6 +420,21 @@ void Cancion::mostrarCuentaAtras(std::function<void()> callbackAlTerminar) {
     QStringList mensajes = { "3", "2", "1", "¡YA!" };
     int* indice = new int(0); // Puntero para mantener el valor entre llamadas
 
+    // Precargar un sonido con volumen 0 para evitar lag inicial
+    Tecla* teclaEjemplo = teclado->getTeclas().isEmpty() ? nullptr : teclado->getTeclas().first();
+
+    if (teclaEjemplo) {
+        QSoundEffect* warmup = new QSoundEffect(this);
+        warmup->setSource(QUrl::fromLocalFile(teclaEjemplo->getRutaAudio()));
+        warmup->setVolume(0.0);  // Sin sonido audible
+        warmup->play();
+
+        // Lo destruimos poco después para liberar memoria
+        QTimer::singleShot(1000, this, [warmup]() {
+            warmup->stop();
+            warmup->deleteLater();
+        });
+    }
     // Comienza el timer
     QTimer* temporizador = new QTimer(this);
     connect(temporizador, &QTimer::timeout, this, [=]() mutable {
@@ -436,8 +463,11 @@ void Cancion::mostrarCuentaAtras(std::function<void()> callbackAlTerminar) {
             delete indice;
             temporizador->deleteLater();
 
+
+
             // Si hay un callback, lo ejecutamos
             if (callbackAlTerminar) {
+
                 callbackAlTerminar();
             }
         }

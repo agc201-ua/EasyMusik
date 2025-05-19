@@ -57,6 +57,8 @@ private:
         QJsonObject datos;
         QTimer* timer;
         bool procesada = false;
+        bool esUltimaNota = false;
+
     };
     QList<NotaCayendo> notasCayendo;
 
@@ -68,6 +70,7 @@ private:
     QString nombreCancion;
     QString nombreArtista;
     qreal bpm;
+
 
     // Otros atributos
     QJsonArray notasJson;
@@ -96,8 +99,8 @@ private:
 
     // Métodos para la gestión de notas y timers
     void programarNotasCayendo();
-    void crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion);
-    void crearNotaCayendo(int indice);
+    void crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion, bool esUltima);
+    void crearNotaCayendo(int indice,bool esUltima);
     void actualizarTimersNotas();
 
 public:
