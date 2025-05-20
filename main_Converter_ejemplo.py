@@ -2,7 +2,7 @@ import sys, traceback, sqlite3
 
 from MusicXMLConverter import MusicXMLConverter
 
-## Ejemplo de uso de la clase y sus métodos.
+## Conversor principal
 if __name__ == "__main__":
     # Verificar si se han pasado los argumentos necesarios.
     if len(sys.argv) != 5:
@@ -21,6 +21,7 @@ if __name__ == "__main__":
     try:
         # Comprobar si el archivo es un PDF.
         if convertermxl.comprobar_pdf():
+
             # Ejecutar conversión de PDF a MusicXML.
             convertermxl.convertir_pdf_a_musicxml()
 

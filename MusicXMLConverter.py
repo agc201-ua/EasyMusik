@@ -35,8 +35,8 @@ class MusicXMLConverter:
         self.audiveris_path = audiveris_path
     
 
+    """Comprueba si el archivo PDF existe y es válido."""
     def comprobar_pdf(self):
-        """Comprueba si el archivo PDF existe y es válido."""
         print(f"Comprobando si el archivo PDF ({self.archivo_pdf}) es válido.")
 
         # Comprobar si el archivo existe
@@ -53,11 +53,11 @@ class MusicXMLConverter:
         return True
 
 
-    def detectar_java(self):
-        """
+    """
         Detecta la instalación de Java en el sistema.
-        Funciona en Windows, macOS y Linux.
+        Funciona en Windows, macOS y Linux (en un principio).
         """
+    def detectar_java(self):
         java_home = self.java_path  # Usar el valor proporcionado si existe
         
         if not java_home:
@@ -135,8 +135,9 @@ class MusicXMLConverter:
         return java_home
 
 
+    """Devuelve la ruta al ejecutable de Java según el sistema operativo."""
     def get_java_executable(self, java_home):
-        """Devuelve la ruta al ejecutable de Java según el sistema operativo."""
+        
         system = platform.system()
         if system == "Windows":
             return os.path.join(java_home, "bin", "java.exe")
@@ -144,11 +145,11 @@ class MusicXMLConverter:
             return os.path.join(java_home, "bin", "java")
 
 
-    def encontrar_audiveris_exe(self):
-        """
+    """
         Encuentra el archivo EXE de Audiveris.
         Primero busca en la ruta proporcionada, luego en el directorio del script.
         """
+    def encontrar_audiveris_exe(self):
         if self.audiveris_path and os.path.exists(self.audiveris_path):
             if os.path.isfile(self.audiveris_path) and self.audiveris_path.endswith(".exe"):
                 print(f"Usando exe de Audiveris proporcionado: {self.audiveris_path}")
@@ -185,24 +186,14 @@ class MusicXMLConverter:
                 exe_path = os.path.join(self.script_dir, file)
                 print(f"exe de Audiveris encontrado en directorio script: {exe_path}")
                 return exe_path
-                
-        # Buscar en la carpeta descargada si existe
-        download_dir = os.path.join(self.script_dir, "Audiveris_downloaded")
-        if os.path.exists(download_dir):
-            for root, dirs, files in os.walk(download_dir):
-                for file in files:
-                    if file.endswith(".exe") and "Audiveris" in file:
-                        exe_path = os.path.join(root, file)
-                        print(f"exe de Audiveris encontrado en carpeta descargada: {exe_path}")
-                        return exe_path
                         
         return None
 
 
-    def encontrar_audiveris_jar(self):
-        """
+    """
         Busca el archivo JAR de Audiveris en varios lugares típicos.
         """
+    def encontrar_audiveris_jar(self):
         # Primero, buscar en la carpeta Audiveris
         audiveris_dir = os.path.join(self.script_dir, "Audiveris")
         if os.path.exists(audiveris_dir):
@@ -239,67 +230,13 @@ class MusicXMLConverter:
                 print(f"JAR de Audiveris encontrado: {jar_path}")
                 return jar_path
         
-        # Buscar en carpeta de descarga si existe
-        download_dir = os.path.join(self.script_dir, "Audiveris_downloaded")
-        if os.path.exists(download_dir):
-            for root, dirs, files in os.walk(download_dir):
-                for file in files:
-                    if file.endswith(".jar") and "Audiveris" in file:
-                        jar_path = os.path.join(root, file)
-                        print(f"JAR de Audiveris encontrado en carpeta descargada: {jar_path}")
-                        return jar_path
-            
-        # Si no encontramos, intentar descargar la última versión
-        print("JAR de Audiveris no encontrado, intentando descargar...")
-        if self.descargar_audiveris():
-            # Volver a buscar después de descargar
-            return self.encontrar_audiveris_jar()
-        
         return None
 
 
-    def descargar_audiveris(self):
-        """
-        Descarga la última versión de Audiveris desde GitHub.
-        """
-        try:
-            import requests
-            from zipfile import ZipFile
-            from io import BytesIO
-            
-            print("Descargando última versión de Audiveris desde GitHub...")
-            
-            # URL de la última versión
-            url = "https://github.com/Audiveris/audiveris/releases/download/5.3.1/Audiveris-5.3.1-windows.zip"
-            
-            # Directorio de destino
-            download_dir = os.path.join(self.script_dir, "Audiveris_downloaded")
-            os.makedirs(download_dir, exist_ok=True)
-            
-            # Descargar archivo
-            response = requests.get(url)
-            if response.status_code == 200:
-                print("Descarga completada, extrayendo archivos...")
-                
-                # Extraer ZIP
-                with ZipFile(BytesIO(response.content)) as zipf:
-                    zipf.extractall(download_dir)
-                
-                print(f"Audiveris descargado y extraído en: {download_dir}")
-                return True
-            else:
-                print(f"Error al descargar Audiveris: Código {response.status_code}")
-                return False
-                
-        except Exception as e:
-            print(f"Error al descargar Audiveris: {e}")
-            return False
-
-
-    def ejecutar_audiveris_jar(self, java_exe, audiveris_jar):
-        """
+    """
         Ejecuta Audiveris directamente desde el archivo JAR usando el ejecutable de Java.
         """
+    def ejecutar_audiveris_jar(self, java_exe, audiveris_jar):
         try:
             print(f"Intentando ejecutar Audiveris desde JAR con {java_exe}")
             
@@ -374,75 +311,11 @@ class MusicXMLConverter:
             return False
 
 
-    def intentar_herramienta_externa(self):
-        """
-        Intenta usar una versión independiente de Audiveris como herramienta externa.
-        """
-        try:
-            print("Intentando ejecutar Audiveris como herramienta independiente...")
-            
-            # Ubicaciones posibles de Audiveris instalado
-            audiveris_locations = [
-                "C:\\Program Files\\Audiveris\\bin\\Audiveris.bat",
-                "C:\\Program Files (x86)\\Audiveris\\bin\\Audiveris.bat",
-                os.path.join(os.environ.get('LOCALAPPDATA', ''), "Programs", "Audiveris", "bin", "Audiveris.bat")
-            ]
-            
-            # Buscar ejecutable
-            audiveris_cmd = None
-            for loc in audiveris_locations:
-                if os.path.exists(loc):
-                    audiveris_cmd = loc
-                    print(f"Encontrado Audiveris instalado en: {loc}")
-                    break
-                    
-            if not audiveris_cmd:
-                print("No se encontró una instalación independiente de Audiveris")
-                return False
-                
-            # Crear directorio temporal para los archivos de salida
-            temp_output_dir = os.path.join(self.script_dir, "temp_audiveris_output")
-            os.makedirs(temp_output_dir, exist_ok=True)
-            
-            # Preparar comando
-            cmd = [
-                audiveris_cmd,
-                "-batch",
-                "-export",
-                "-output", temp_output_dir,
-                "-option", "org.audiveris.omr.sheet.BookManager.useSeparateBookFolders=false",
-                "-option", "org.audiveris.omr.export.ScoreExporter.musicxmlUseCompression=true",
-                self.archivo_pdf
-            ]
-            
-            print(f"Comando: {' '.join(cmd)}")
-            
-            # Ejecutar el comando
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            
-            if result.returncode == 0:
-                # Buscar archivo MXL
-                for file in os.listdir(temp_output_dir):
-                    if file.endswith(".mxl"):
-                        mxl_path = os.path.join(temp_output_dir, file)
-                        shutil.copy2(mxl_path, self.archivo_mxl)
-                        print(f"Archivo MXL copiado a: {self.archivo_mxl}")
-                        shutil.rmtree(temp_output_dir)
-                        return True
-                        
-            print(f"Error al ejecutar herramienta externa. Código: {result.returncode}")
-            return False
-            
-        except Exception as e:
-            print(f"Error con herramienta externa: {e}")
-            return False
-
-
-    def setup_audiveris_runtime(self, java_home):
-        """
+    """
         Configura el directorio runtime de Audiveris con archivos de Java necesarios.
         Copia los archivos esenciales de JRE a la ubicación esperada por Audiveris.
         """
+    def setup_audiveris_runtime(self, java_home):
         audiveris_exe = self.encontrar_audiveris_exe()
         if not audiveris_exe:
             print("No se puede configurar runtime: No se encontró Audiveris.exe")
@@ -498,7 +371,7 @@ class MusicXMLConverter:
                     shutil.copy2(src_path, dst_path)
                     print(f"Copiado: {file}")
             
-            # Buscar y copiar jvm.cfg - ARCHIVO CRÍTICO QUE FALTABA
+            # Buscar y copiar jvm.cfg - ARCHIVO CRÍTICO
             jvm_cfg_paths = [
                 os.path.join(java_home, "lib", "jvm.cfg"),
                 os.path.join(java_home, "jre", "lib", "jvm.cfg"),
@@ -631,11 +504,11 @@ class MusicXMLConverter:
             return False    
 
 
-    def convertir_pdf_a_musicxml(self):
-        """
+    """
         Convierte un archivo PDF a MusicXML utilizando Audiveris.
         Intenta múltiples métodos para ejecutar Audiveris.
         """
+    def convertir_pdf_a_musicxml(self):
         print(f"Convirtiendo el archivo PDF ({self.archivo_pdf}) a MusicXML.")
         
         # 1. Detectar Java
@@ -656,13 +529,7 @@ class MusicXMLConverter:
         # Variable para controlar si algún método tuvo éxito
         conversion_exitosa = False
         
-        # 3. MÉTODO 1: Intentar con herramienta externa independiente
-        print("\nMÉTODO 1: Intentando ejecutar Audiveris como herramienta externa independiente...")
-        if self.intentar_herramienta_externa():
-            print("Conversión exitosa usando Audiveris independiente.")
-            return
-        
-        # 4. MÉTODO 2: Intentar con Audiveris JAR directamente
+        # 3. MÉTODO 1: Intentar con Audiveris JAR directamente
         print("\nMÉTODO 2: Intentando ejecutar Audiveris directamente desde JAR...")
         audiveris_jar = self.encontrar_audiveris_jar()
         
@@ -673,7 +540,7 @@ class MusicXMLConverter:
                 print("Conversión exitosa mediante JAR de Audiveris.")
                 return
         
-        # 5. MÉTODO 3: Intentar con Audiveris EXE y runtime personalizado
+        # 3. MÉTODO 2: Intentar con Audiveris EXE y runtime personalizado
         print("\nMÉTODO 3: Intentando ejecutar Audiveris desde EXE con runtime personalizado...")
         audiveris_exe = self.encontrar_audiveris_exe()
         
@@ -742,131 +609,14 @@ class MusicXMLConverter:
         else:
             print("No se encontró el EXE de Audiveris para el MÉTODO 3.")
         
-        # 6. MÉTODO 4: Alternativas (ImageMagick u otras herramientas)
-        if not conversion_exitosa:
-            print("\nMÉTODO 4: Intentando procesar con métodos alternativos...")
-            try:
-                # Verificar si ImageMagick está disponible
-                imagemagick_available = False
-                try:
-                    # Probar comando 'magick' (más nuevo) o 'convert' (más antiguo)
-                    for cmd in ["magick", "convert"]:
-                        check_cmd = [cmd, "--version"] if cmd == "magick" else [cmd, "-version"]
-                        img_check = subprocess.run(check_cmd, capture_output=True, text=True)
-                        if img_check.returncode == 0:
-                            imagemagick_available = True
-                            imagemagick_cmd = cmd
-                            print(f"ImageMagick detectado ({cmd})")
-                            break
-                except:
-                    print("ImageMagick no detectado")
-                
-                if imagemagick_available:
-                    img_output_dir = os.path.join(self.script_dir, "temp_images")
-                    os.makedirs(img_output_dir, exist_ok=True)
-                    
-                    # Usar el comando detectado
-                    if imagemagick_cmd == "magick":
-                        convert_cmd = [
-                            "magick", "convert", 
-                            "-density", "300", 
-                            self.archivo_pdf, 
-                            os.path.join(img_output_dir, "page-%03d.png")
-                        ]
-                    else:  # Comando antiguo 'convert'
-                        convert_cmd = [
-                            "convert", 
-                            "-density", "300", 
-                            self.archivo_pdf, 
-                            os.path.join(img_output_dir, "page-%03d.png")
-                        ]
-                    
-                    convert_result = subprocess.run(convert_cmd, capture_output=True, text=True)
-                    
-                    if convert_result.returncode == 0:
-                        print("PDF convertido a imágenes exitosamente")
-                        image_files = [f for f in os.listdir(img_output_dir) if f.endswith('.png')]
-                        print(f"Imágenes generadas: {len(image_files)}")
-                        print("ADVERTENCIA: Se requiere procesamiento manual de las imágenes")
-                        print(f"Las imágenes están en: {img_output_dir}")
-                        
-                        # Intentar usar OCR o herramientas específicas para música aquí
-                        # Por ahora, continuamos con MXL provisional
-                else:
-                    print("No se detectó ImageMagick para convertir el PDF a imágenes")
-                    
-            except Exception as e:
-                print(f"Error en método alternativo: {e}")
-                traceback.print_exc()
-        
-        # 7. Si todos los métodos fallan, generar un MXL provisional
+        # 3. Si todos los métodos fallan, generar un MXL provisional
         if not os.path.exists(self.archivo_mxl):
             print("\nTodos los métodos fallaron. Generando archivo MXL provisional...")
             self.generar_mxl_provisional()
-    
-
-    def convertir_con_metodo_alternativo(self):
-        """Intenta convertir el PDF a imágenes como método alternativo."""
-        print("\nIntentando procesar PDF con herramientas alternativas...")
-        
-        try:
-            # Verificar si ImageMagick está disponible
-            imagemagick_available = False
-            try:
-                # Probar comando 'magick' (más nuevo) o 'convert' (más antiguo)
-                for cmd in ["magick", "convert"]:
-                    check_cmd = [cmd, "--version"] if cmd == "magick" else [cmd, "-version"]
-                    img_check = subprocess.run(check_cmd, capture_output=True, text=True)
-                    if img_check.returncode == 0:
-                        imagemagick_available = True
-                        imagemagick_cmd = cmd
-                        print(f"ImageMagick detectado ({cmd})")
-                        break
-            except:
-                print("ImageMagick no detectado")
-            
-            if imagemagick_available:
-                img_output_dir = os.path.join(self.script_dir, "temp_images")
-                os.makedirs(img_output_dir, exist_ok=True)
-                
-                # Usar el comando detectado
-                if imagemagick_cmd == "magick":
-                    convert_cmd = [
-                        "magick", "convert", 
-                        "-density", "300", 
-                        self.archivo_pdf, 
-                        os.path.join(img_output_dir, "page-%03d.png")
-                    ]
-                else:  # Comando antiguo 'convert'
-                    convert_cmd = [
-                        "convert", 
-                        "-density", "300", 
-                        self.archivo_pdf, 
-                        os.path.join(img_output_dir, "page-%03d.png")
-                    ]
-                
-                convert_result = subprocess.run(convert_cmd, capture_output=True, text=True)
-                
-                if convert_result.returncode == 0:
-                    print("PDF convertido a imágenes exitosamente")
-                    image_files = [f for f in os.listdir(img_output_dir) if f.endswith('.png')]
-                    print(f"Imágenes generadas: {len(image_files)}")
-                    print("ADVERTENCIA: Se requiere procesamiento manual de las imágenes")
-                    print(f"Las imágenes están en: {img_output_dir}")
-            else:
-                print("No se detectó ImageMagick para convertir el PDF a imágenes")
-                
-        except Exception as e:
-            print(f"Error en método alternativo: {e}")
-            traceback.print_exc()
-        
-        # Si todos los métodos fallan, generar un archivo MXL provisional
-        print("\nGenerando archivo MXL provisional...")
-        self.generar_mxl_provisional()
 
 
+    """Genera un archivo MXL básico para continuar el flujo cuando fallan otros métodos."""
     def generar_mxl_provisional(self):
-        """Genera un archivo MXL básico para continuar el flujo cuando fallan otros métodos."""
         # Crear un stream de música básico con una nota
         s = stream.Stream()
         s.append(metadata.Metadata())
@@ -885,16 +635,15 @@ class MusicXMLConverter:
         return self.archivo_mxl
 
 
-    def musicxml_a_json(self, guardar_txt=True):
-        """
+    """
         Convierte un archivo MusicXML a JSON y lo guarda en la base de datos.
         Si guardar_txt es True, guarda también los archivos .json y .txt.
         """
+    def musicxml_a_json(self, guardar_txt=True):
         print(f"Convirtiendo el archivo MusicXML ({self.archivo_mxl}) a texto.")
 
         try:
             partitura = converter.parse(self.archivo_mxl)
-            
             notas = []
 
             # Recorrer notas y acordes
@@ -944,8 +693,8 @@ class MusicXMLConverter:
             traceback.print_exc()
 
 
+    """Guarda los datos de la partitura en la base de datos SQLite."""
     def guardar_en_bd(self, datos_txt):
-        """Guarda los datos de la partitura en la base de datos SQLite."""
         try:
             # Verificar que existe la base de datos, crearla si no
             self.verificar_bd()
@@ -979,8 +728,8 @@ class MusicXMLConverter:
             traceback.print_exc()
 
 
+    """Verifica que la base de datos existe y tiene la estructura correcta."""
     def verificar_bd(self):
-        """Verifica que la base de datos existe y tiene la estructura correcta."""
         try:
             conexion = sqlite3.connect("canciones.db")
             cursor = conexion.cursor()
@@ -1008,8 +757,8 @@ class MusicXMLConverter:
             traceback.print_exc()
 
 
+    """Elimina archivos temporales generados durante la conversión."""
     def eliminar_temporales(self):
-        """Elimina archivos temporales generados durante la conversión."""
         print("Eliminando archivos temporales...")
         
         # Listar extensiones a eliminar
