@@ -16,5 +16,5 @@ int main(int argc, char *argv[])
     w.show();
 
     // El bucle de eventos Qt arranca, y la aplicación permanece ejecutándose hasta que el usuario la cierre
-    return a.exec();   // Esto mantiene la aplicación viva y escucha los eventos de la interfaz
+    return a.exec();
 }
