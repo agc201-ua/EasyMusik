@@ -27,6 +27,13 @@ CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget 
     containerWidget->setObjectName("contenedorBlanco");
     containerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
+    // Asegurarse que el contenedor tenga fondo blanco y bordes redondeados
+    containerWidget->setStyleSheet(
+        "background-color: white;"
+        "border-radius: 10px;"
+        "border: 1px solid #CCCCCC;"
+        );
+
     // Layout horizontal para el contenedor principal
     QHBoxLayout *containerLayout = new QHBoxLayout(containerWidget);
     containerLayout->setContentsMargins(16, 12, 16, 12);
@@ -34,9 +41,11 @@ CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget 
 
     // Widget para la información (título y artista)
     QWidget *infoContainer = new QWidget();
+    infoContainer->setStyleSheet("background-color: transparent; border: none;"); // Sin bordes
     QVBoxLayout *infoLayout = new QVBoxLayout(infoContainer);
     infoLayout->setContentsMargins(0, 0, 0, 0);
     infoLayout->setSpacing(8);
+    infoLayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter); // Alinear a la izquierda y centrar verticalmente
 
     // Crear y configurar el label del título
     tituloLabel = new QLabel(titulo, infoContainer);
@@ -44,12 +53,14 @@ CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget 
     tituloFont.setPointSize(14);
     tituloFont.setBold(true);
     tituloLabel->setFont(tituloFont);
+    tituloLabel->setStyleSheet("color: black; border: none; background: transparent;"); // Sin bordes
 
     // Crear y configurar el label del artista
     artistaLabel = new QLabel(artista, infoContainer);
     QFont artistaFont = artistaLabel->font();
     artistaFont.setPointSize(12);
     artistaLabel->setFont(artistaFont);
+    artistaLabel->setStyleSheet("color: black; border: none; background: transparent;"); // Sin bordes
 
     // Añadir labels al layout de info
     infoLayout->addWidget(tituloLabel);
@@ -74,7 +85,7 @@ CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget 
         "QPushButton:pressed {"
         "    background-color: #cccccc;"
         "}"
-    );
+        );
 
     // Añadir widgets al layout del contenedor
     containerLayout->addWidget(infoContainer, 1); // Que ocupe el espacio disponible
@@ -83,20 +94,13 @@ CancionItem::CancionItem(const QString &titulo, const QString &artista, QWidget 
     // Añadir el contenedor blanco al layout principal
     mainLayout->addWidget(containerWidget);
 
-    // Estilo visual
+    // El fondo del QWidget principal es transparente para ver el fondo de la aplicación
     setStyleSheet(
         "QWidget#cancionItem {"
         "    background-color: transparent;"
+        "    border: none;"
         "}"
-        "QWidget#contenedorBlanco {"
-        "    background-color: white;"
-        "    border: 1px solid #CCCCCC;"
-        "    border-radius: 10px;"
-        "}"
-        "QLabel {"
-        "    color: black;"
-        "}"
-    );
+        );
 
     // Conectar evento del botón de reproducción
     connect(playButton, &QPushButton::clicked, [this]() {
@@ -127,6 +131,9 @@ MenuPrincipal::~MenuPrincipal() {
 
 // Inicializamos la interfaz
 void MenuPrincipal::inicializarUI() {
+    //
+    setStyleSheet("background-color: #212121;");
+
     // Layout principal
     mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(30, 30, 30, 30);
@@ -347,14 +354,28 @@ void MenuPrincipal::agregarNuevaCancion() {
         return;
     }
 
+    QWidget tempWidget;
+    tempWidget.setStyleSheet(
+        "QInputDialog {"
+        "    background-color: white;"
+        "}"
+        "QInputDialog QLabel {"
+        "    color: black;"
+        "}"
+        "QInputDialog QLineEdit {"
+        "    background-color: white;"
+        "    color: black;"
+        "}"
+    );
+
     // Pedir datos al usuario
-    QString titulo = QInputDialog::getText(this, "Nueva Canción", "Título de la canción:");
+    QString titulo = QInputDialog::getText(&tempWidget, "Nueva Canción", "Título de la canción:");
     if (titulo.isEmpty()) titulo = "Desconocido";
 
-    QString artista = QInputDialog::getText(this, "Nueva Canción", "Artista:");
+    QString artista = QInputDialog::getText(&tempWidget, "Nueva Canción", "Artista:");
     if (artista.isEmpty()) artista = "Desconocido";
 
-    QString mensaje = "Bpm (velocidad de reproducción de la canción):";
+    QString ritmo = QInputDialog::getText(&tempWidget, "Nueva Canción", "Bpm (velocidad de reproducción de la canción):");
 
     int bpm;
     bool bpmOk;

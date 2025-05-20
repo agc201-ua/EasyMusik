@@ -7,18 +7,28 @@
 
 // Inicializar la interfaz
 void Cancion::inicializarUI() {
+    // Aplicar estilo global al widget de Cancion
+    setStyleSheet("background-color: #212121;");
+
     // Crear layout principal para el widget
     mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    // Se crea la escena
+    // Se crea la escena con fondo oscuro
     scene = new QGraphicsScene(this);
     scene->setBackgroundBrush(QColor("#212121"));
 
     // Se crea y se configura la vista
     view = new QGraphicsView(scene, this);
-    view->setRenderHint(QPainter::Antialiasing); // Mejorar la calidad del renderizado
+    view->setRenderHint(QPainter::Antialiasing);
+    view->setBackgroundBrush(QColor("#212121")); // Asegurar que la vista tenga el mismo fondo
+
+    // Configurar la vista para evitar artefactos de renderizado
+    view->setCacheMode(QGraphicsView::CacheBackground);
+    view->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    view->setOptimizationFlags(QGraphicsView::DontAdjustForAntialiasing |
+                               QGraphicsView::DontSavePainterState);
 
     // Importante: Añadir la vista al layout
     mainLayout->addWidget(view);
@@ -29,6 +39,7 @@ void Cancion::inicializarUI() {
 
     // Eliminar el marco de la vista
     view->setFrameShape(QFrame::NoFrame);
+    view->setStyleSheet("border: none; background-color: #212121;");
 
     // Se obtienen las dimensiones de la pantalla
     QScreen *screen = QGuiApplication::primaryScreen();
@@ -41,6 +52,9 @@ void Cancion::inicializarUI() {
 
     // Ajustar la vista para mostrar toda la escena sin escala
     view->setFixedSize(anchuraPantalla, alturaPantalla);
+
+    // Asegurarse de que el viewport tenga el fondo correcto
+    view->viewport()->setStyleSheet("background-color: #212121;");
 
     // Se crea el teclado y se añaden sus teclas a la escena
     teclado = new Teclado(scene, anchuraPantalla, alturaPantalla);
@@ -221,7 +235,6 @@ void Cancion::programarNotasCayendo() {
     // Se programa cada nota cayendo a partir de las notas guardadas en el array del JSON
     for (int i = 0; i < notasJson.size(); i++) {
 
-
         QJsonObject datos = notasJson[i].toObject();
 
         NotaCayendo nota;
@@ -244,6 +257,7 @@ void Cancion::programarNotasCayendo() {
     // Se inician todos los timers con el tiempo correcto
     actualizarTimersNotas();
 }
+
 
 // Crear una nota cayendo en específico
 void Cancion::crearNotaCayendo(int indice,bool esUltima) {
@@ -272,6 +286,7 @@ void Cancion::crearNotaCayendo(int indice,bool esUltima) {
         indiceNotaActual++;
     }
 }
+
 
 // Crea una nota visual que cae desde una posición concreta y colisiona con una tecla
 void Cancion::crearNotaCayendo(qreal posX, qreal posY, Tecla* teclaObjetivo, qreal duracion,bool esUltima) {

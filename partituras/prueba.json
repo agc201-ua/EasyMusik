@@ -1,0 +1,244 @@
+{
+    "Notas": [
+        {
+            "Nota": "D",
+            "Octava": 4,
+            "Offset": 0.0,
+            "Duracion": 1.0
+        },
+        {
+            "Nota": "D",
+            "Octava": 4,
+            "Offset": 1.0,
+            "Duracion": 1.0
+        },
+        {
+            "Nota": "D",
+            "Octava": 4,
+            "Offset": 2.0,
+            "Duracion": 1.0
+        },
+        {
+            "Nota": "G",
+            "Octava": 4,
+            "Offset": 3.0,
+            "Duracion": 2.0
+        },
+        {
+            "Nota": "D",
+            "Octava": 5,
+            "Offset": 5.0,
+            "Duracion": 2.0
+        },
+        {
+            "Nota": "C",
+            "Octava": 5,
+            "Offset": 7.0,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "B",
+            "Octava": 4,
+            "Offset": 7.5,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "A",
+            "Octava": 4,
+            "Offset": 8.0,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "G",
+            "Octava": 4,
+            "Offset": 8.5,
+            "Duracion": 2.0
+        },
+        {
+            "Nota": "D",
+            "Octava": 5,
+            "Offset": 10.5,
+            "Duracion": 1.0
+        },
+        {
+            "Nota": "C",
+            "Octava": 5,
+            "Offset": 11.5,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "B",
+            "Octava": 4,
+            "Offset": 12.0,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "A",
+            "Octava": 4,
+            "Offset": 12.5,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "G",
+            "Octava": 4,
+            "Offset": 13.0,
+            "Duracion": 2.0
+        },
+        {
+            "Nota": "D",
+            "Octava": 5,
+            "Offset": 15.0,
+            "Duracion": 1.0
+        },
+        {
+            "Nota": "C",
+            "Octava": 5,
+            "Offset": 16.0,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "B",
+            "Octava": 4,
+            "Offset": 16.5,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "C",
+            "Octava": 5,
+            "Offset": 17.0,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "A",
+            "Octava": 4,
+            "Offset": 17.5,
+            "Duracion": 1.5
+        },
+        {
+            "Nota": "D",
+            "Octava": 5,
+            "Offset": 19.0,
+            "Duracion": 4.0
+        },
+        {
+            "Nota": "G",
+            "Octava": 5,
+            "Offset": 23.0,
+            "Duracion": 2.0
+        },
+        {
+            "Nota": "G",
+            "Octava": 4,
+            "Offset": 25.0,
+            "Duracion": 1.0
+        },
+        {
+            "Nota": "G",
+            "Octava": 4,
+            "Offset": 26.0,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "G",
+            "Octava": 4,
+            "Offset": 26.5,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "G",
+            "Octava": 5,
+            "Offset": 27.0,
+            "Duracion": 2.0
+        },
+        {
+            "Nota": "F+",
+            "Octava": 5,
+            "Offset": 29.0,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "F",
+            "Octava": 5,
+            "Offset": 29.5,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "E",
+            "Octava": 5,
+            "Offset": 30.0,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "D+",
+            "Octava": 5,
+            "Offset": 30.5,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "E",
+            "Octava": 5,
+            "Offset": 31.0,
+            "Duracion": 1.0
+        },
+        {
+            "Nota": "G+",
+            "Octava": 4,
+            "Offset": 32.0,
+            "Duracion": 1.0
+        },
+        {
+            "Nota": "C+",
+            "Octava": 5,
+            "Offset": 33.0,
+            "Duracion": 2.0
+        },
+        {
+            "Nota": "C",
+            "Octava": 5,
+            "Offset": 35.0,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "B",
+            "Octava": 4,
+            "Offset": 35.5,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "A+",
+            "Octava": 4,
+            "Offset": 36.0,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "A",
+            "Octava": 4,
+            "Offset": 36.5,
+            "Duracion": 0.5
+        },
+        {
+            "Nota": "B",
+            "Octava": 4,
+            "Offset": 37.0,
+            "Duracion": 1.0
+        },
+        {
+            "Nota": "F",
+            "Octava": 4,
+            "Offset": 38.0,
+            "Duracion": 1.0
+        },
+        {
+            "Nota": "A+",
+            "Octava": 4,
+            "Offset": 39.0,
+            "Duracion": 2.0
+        },
+        {
+            "Nota": "G",
+            "Octava": 4,
+            "Offset": 41.0,
+            "Duracion": 4.0
+        }
+    ]
+}
