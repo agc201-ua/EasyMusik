@@ -311,6 +311,8 @@ bool MenuPrincipal::conectarBaseDeDatos() {
 }
 
 void MenuPrincipal::cargarCancionesDesdeBD() {
+    db.open();
+
     // Limpiar layout previo
     QLayoutItem *child;
     while ((child = cancionesLayout->takeAt(0)) != nullptr) {
