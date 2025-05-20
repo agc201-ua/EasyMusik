@@ -433,7 +433,32 @@ void MenuPrincipal::agregarNuevaCancion() {
         }
 
         cargarCancionesDesdeBD();
-        QMessageBox::information(this, "Éxito", "La canción se ha añadido correctamente.");
+
+        // Mostrar mensaje de éxito
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("Éxito");
+        msgBox.setText("La canción se ha añadido correctamente.");
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setStyleSheet(
+            "QMessageBox {"
+            "    background-color: white;"
+            "}"
+            "QMessageBox QLabel {"
+            "    background-color: white;"
+            "    color: black;"
+            "}"
+            "QMessageBox QPushButton {"
+            "    background-color: #2d89ef;"
+            "    color: white;"
+            "    border-radius: 4px;"
+            "    padding: 6px 12px;"
+            "    min-width: 80px;"
+            "}"
+            "QMessageBox QPushButton:hover {"
+            "    background-color: #3999ff;"
+            "}"
+        );
+        msgBox.exec();
     });
 
     connect(proceso, &QProcess::errorOccurred, this, [=](QProcess::ProcessError error) {
