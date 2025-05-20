@@ -190,9 +190,6 @@ void Cancion::leerNotasDesdeBaseDeDatos() {
     } else {
         qWarning() << "No se encontró la partitura para título y autor dados.";
     }
-
-    db.close();
-    QSqlDatabase::removeDatabase("Verificador"); // Limpia la conexión
 }
 
 // Iniciar la canción
