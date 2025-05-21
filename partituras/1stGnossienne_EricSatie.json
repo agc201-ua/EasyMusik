@@ -873,79 +873,79 @@
         {
             "Nota": "C",
             "Octava": 5,
-            "Offset": 72.0,
+            "Offset": 72.5,
             "Duracion": 2.0
         },
         {
             "Nota": "B",
             "Octava": 4,
-            "Offset": 74.0,
+            "Offset": 74.5,
             "Duracion": 2.0
         },
         {
             "Nota": "G",
             "Octava": 4,
-            "Offset": 82.0,
+            "Offset": 82.5,
             "Duracion": 1.0
         },
         {
             "Nota": "F",
             "Octava": 2,
-            "Offset": 82.0,
+            "Offset": 82.5,
             "Duracion": 4.0
         },
         {
             "Nota": "F",
             "Octava": 4,
-            "Offset": 83.0,
+            "Offset": 83.5,
             "Duracion": 3.0
         },
         {
             "Nota": "A-",
             "Octava": 3,
-            "Offset": 83.0,
+            "Offset": 83.5,
             "Duracion": 2.0
         },
         {
             "Nota": "C",
             "Octava": 4,
-            "Offset": 83.0,
+            "Offset": 83.5,
             "Duracion": 2.0
         },
         {
             "Nota": "F",
             "Octava": 4,
-            "Offset": 83.0,
+            "Offset": 83.5,
             "Duracion": 2.0
         },
         {
             "Nota": "A-",
             "Octava": 3,
-            "Offset": 85.0,
+            "Offset": 85.5,
             "Duracion": 1.0
         },
         {
             "Nota": "C",
             "Octava": 4,
-            "Offset": 85.0,
+            "Offset": 85.5,
             "Duracion": 1.0
         },
         {
             "Nota": "F",
             "Octava": 4,
-            "Offset": 85.0,
+            "Offset": 85.5,
             "Duracion": 1.0
         },
         {
             "Nota": "F",
             "Octava": 4,
-            "Offset": 86.0,
+            "Offset": 86.5,
             "Duracion": 4.0
         },
         {
             "Nota": "F",
             "Octava": 2,
-            "Offset": 86.0,
+            "Offset": 86.5,
             "Duracion": 4.0
         }
     ]

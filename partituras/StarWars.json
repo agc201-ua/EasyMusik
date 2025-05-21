@@ -442,13 +442,13 @@
             "Nota": "C",
             "Octava": 4,
             "Offset": 30.5,
-            "Duracion": 3.0
+            "Duracion": 2.0
         },
         {
             "Nota": "E",
             "Octava": 4,
             "Offset": 30.5,
-            "Duracion": 3.0
+            "Duracion": 2.0
         },
         {
             "Nota": "G",
@@ -1426,13 +1426,13 @@
             "Nota": "C",
             "Octava": 4,
             "Offset": 95.5,
-            "Duracion": 3.0
+            "Duracion": 2.0
         },
         {
             "Nota": "E",
             "Octava": 4,
             "Offset": 95.5,
-            "Duracion": 3.0
+            "Duracion": 2.0
         }
     ]
 }
